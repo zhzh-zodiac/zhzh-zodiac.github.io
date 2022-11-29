@@ -1,8 +1,8 @@
 ---
 title: hexo base command
 date: 2022-11-24 14:52:42
-tags: "Hexo"
-categories: "Hexo"
+tags: "hexo"
+categories: "hexo"
 ---
 
 > 初始化&一些基础命令
