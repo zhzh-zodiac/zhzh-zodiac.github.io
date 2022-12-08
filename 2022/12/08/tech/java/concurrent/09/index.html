@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhzh-zodiac.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.13.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在本课时我们主要学习为什么使用线程池比手动创建线程要好，并讲解具体好在哪里？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="09 使用线程池比手动创建线程好在哪里？">
+<meta property="og:url" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/index.html">
+<meta property="og:site_name" content="四次元藏宝阁">
+<meta property="og:description" content="在本课时我们主要学习为什么使用线程池比手动创建线程要好，并讲解具体好在哪里？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/c_09_01.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/c_09_02.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/c_09_03.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/c_09_04.png">
+<meta property="article:published_time" content="2022-12-08T10:01:16.000Z">
+<meta property="article:modified_time" content="2022-12-08T10:13:34.881Z">
+<meta property="article:author" content="zhzh">
+<meta property="article:tag" content="tech">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="线程池">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/c_09_01.png">
+
+
+<link rel="canonical" href="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/","path":"2022/12/08/tech/java/concurrent/09/","title":"09 使用线程池比手动创建线程好在哪里？"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>09 使用线程池比手动创建线程好在哪里？ | 四次元藏宝阁</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CDJNMEF4RB"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-CDJNMEF4RB","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fb613ad8138fa943a677dedb57bb5889"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">四次元藏宝阁</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">on the way</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-摸鱼日历"><a href="/moyu" rel="section"><i class="fa fa-calendar fa-fw"></i>摸鱼日历</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">为什么要使用线程池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">线程池解决问题思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">3.</span> <span class="nav-text">如何使用线程池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">4.</span> <span class="nav-text">使用线程池的好处</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zhzh"
+      src="/uploads/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">zhzh</p>
+  <div class="site-description" itemprop="description">on the way</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhzh-zodiac" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhzh-zodiac" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/12/08/tech/java/concurrent/09/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpeg">
+      <meta itemprop="name" content="zhzh">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="四次元藏宝阁">
+      <meta itemprop="description" content="on the way">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="09 使用线程池比手动创建线程好在哪里？ | 四次元藏宝阁">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          09 使用线程池比手动创建线程好在哪里？
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/" itemprop="url" rel="index"><span itemprop="name">tech</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/concurrent/" itemprop="url" rel="index"><span itemprop="name">concurrent</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在本课时我们主要学习为什么使用线程池比手动创建线程要好，并讲解具体好在哪里？</p>
+<span id="more"></span>
+
+<h4 id="为什么要使用线程池"><a href="#为什么要使用线程池" class="headerlink" title="为什么要使用线程池"></a>为什么要使用线程池</h4><p>首先，回顾线程池的相关知识，在 Java 诞生之初是没有线程池的概念的，而是先有线程，随着线程数的不断增加，人们发现需要一个专门的类来管理它们，于是才诞生了线程池。没有线程池的时候，每发布一个任务就需要创建一个新的线程，这样在任务少时是没有问题的，如代码所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment">* 描述：     单个任务的时候，新建线程来执行 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OneTask</span> &#123; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123; </span><br><span class="line">        <span class="type">Thread</span> <span class="variable">thread0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Task</span>());</span><br><span class="line">        thread0.start();</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123; </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123; </span><br><span class="line">           System.out.println(<span class="string">&quot;Thread Name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这段代码中，我们发布了一个新的任务并放入子线程中，然后启动子线程执行任务，这时的任务也非常简单，只是打印出当前线程的名字，这种情况下，打印结果显示 Thread Name: Thread-0，即我们当前子线程的默认名字。</p>
+<img data-src="/2022/12/08/tech/java/concurrent/09/c_09_01.png" class="">
+
+<p>我们来看一下任务执行流程，如图所示，主线程调用 start() 方法，启动了一个 t0 的子线程。这是在一个任务的场景下，随着我们的任务增多，比如现在有 10 个任务了，那么我们就可以使用 for 循环新建 10 个子线程，如代码所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment">* 描述：     for循环新建10个线程 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TenTask</span> &#123; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123; </span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123; </span><br><span class="line">            <span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Task</span>());</span><br><span class="line">            thread.start();</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123; </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123; </span><br><span class="line">            System.out.println(<span class="string">&quot;Thread Name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Thread Name: Thread-<span class="number">1</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">4</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">2</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">0</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">6</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">7</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">8</span></span><br><span class="line"></span><br><span class="line">Thread Name: Thread-<span class="number">9</span></span><br></pre></td></tr></table></figure>
+
+<p>这里你会发现，打印出来的顺序是错乱的，比如 Thread-4 打印在了 Thread-3 之前，这是因为，虽然 Thread-3 比 Thread-4 先执行 start 方法，但是这并不代表 Thread-3 就会先运行，运行的顺序取决于线程调度器，有很大的随机性，这是需要我们注意的地方。</p>
+<img data-src="/2022/12/08/tech/java/concurrent/09/c_09_02.png" class="">
+
+<p>我们再看来下线程的执行流程，如图所示，主线程通过 for 循环创建了 t0~t9 这 10 个子线程，它们都可以正常的执行任务，但如果此时我们的任务量突然飙升到 10000 会怎么样？我们先来看看依然用 for 循环的实现方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">    <span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Task</span>());</span><br><span class="line">    thread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如图所示，我们创建了 10000 个子线程，而 Java 程序中的线程与操作系统中的线程是一一对应的，此时假设线程中的任务需要一定的耗时才能够完成，便会产生很大的系统开销与资源浪费。</p>
+<img data-src="/2022/12/08/tech/java/concurrent/09/c_09_03.png" class="">
+
+<p>创建线程时会产生系统开销，并且每个线程还会占用一定的内存等资源，更重要的是我们创建如此多的线程也会给稳定性带来危害，因为每个系统中，可创建线程的数量是有一个上限的，不可能无限的创建。线程执行完需要被回收，大量的线程又会给垃圾回收带来压力。但我们的任务确实非常多，如果都在主线程串行执行，那效率也太低了，那应该怎么办呢？于是便诞生了线程池来平衡线程与系统资源之间的关系。</p>
+<p>我们来总结下如果每个任务都创建一个线程会带来哪些问题：</p>
+<ol>
+<li>第一点，反复创建线程系统开销比较大，每个线程创建和销毁都需要时间，如果任务比较简单，那么就有可能导致创建和销毁线程消耗的资源比线程执行任务本身消耗的资源还要大。</li>
+<li>第二点，过多的线程会占用过多的内存等资源，还会带来过多的上下文切换，同时还会导致系统不稳定。</li>
+</ol>
+<h4 id="线程池解决问题思路"><a href="#线程池解决问题思路" class="headerlink" title="线程池解决问题思路"></a>线程池解决问题思路</h4><p>针对上面的两点问题，线程池有两个解决思路。</p>
+<p>首先，针对反复创建线程开销大的问题，线程池用一些固定的线程一直保持工作状态并反复执行任务。</p>
+<p>其次，针对过多线程占用太多内存资源的问题，解决思路更直接，线程池会根据需要创建线程，控制线程的总数量，避免占用过多内存资源。</p>
+<h4 id="如何使用线程池"><a href="#如何使用线程池" class="headerlink" title="如何使用线程池"></a>如何使用线程池</h4><p>线程池就好比一个池塘，池塘里的水是有限且可控的，比如我们选择线程数固定数量的线程池，假设线程池有 5 个线程，但此时的任务大于 5 个，线程池会让余下的任务进行排队，而不是无限制的扩张线程数量，保障资源不会被过度消耗。如代码所示，我们往 5 个线程的线程池中放入 10000 个任务并打印当前线程名字，结果会是怎么样呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment">* 描述：     用固定线程数的线程池执行10000个任务 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadPoolDemo</span> &#123; </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123; </span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">service</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123; </span><br><span class="line">            service.execute(<span class="keyword">new</span> <span class="title class_">Task</span>());</span><br><span class="line">        &#125; </span><br><span class="line">        System.out.println(Thread.currentThread().getName());</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123; </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123; </span><br><span class="line">            System.out.println(<span class="string">&quot;Thread Name: &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行效果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">1</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">2</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">4</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">2</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">1</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">Thread Name: pool-<span class="number">1</span>-thread-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如打印结果所示，打印的线程名始终在 Thread Name: pool-1-thread-1~5 之间变化，并没有超过这个范围，也就证明了线程池不会无限制地扩张线程的数量，始终是这5个线程在工作。</p>
+<img data-src="/2022/12/08/tech/java/concurrent/09/c_09_04.png" class="">
+
+<p>执行流程如图所示，首先创建了一个线程池，线程池中有 5 个线程，然后线程池将 10000 个任务分配给这 5 个线程，这 5 个线程反复领取任务并执行，直到所有任务执行完毕，这就是线程池的思想。</p>
+<h4 id="使用线程池的好处"><a href="#使用线程池的好处" class="headerlink" title="使用线程池的好处"></a>使用线程池的好处</h4><p>使用线程池比手动创建线程主要有三点好处。</p>
+<ol>
+<li>第一点，线程池可以解决线程生命周期的系统开销问题，同时还可以加快响应速度。因为线程池中的线程是可以复用的，我们只用少量的线程去执行大量的任务，这就大大减小了线程生命周期的开销。而且线程通常不是等接到任务后再临时创建，而是已经创建好时刻准备执行任务，这样就消除了线程创建所带来的延迟，提升了响应速度，增强了用户体验。</li>
+<li>第二点，线程池可以统筹内存和 CPU 的使用，避免资源使用不当。线程池会根据配置和任务数量灵活地控制线程数量，不够的时候就创建，太多的时候就回收，避免线程过多导致内存溢出，或线程太少导致 CPU 资源浪费，达到了一个完美的平衡。</li>
+<li>第三点，线程池可以统一管理资源。比如线程池可以统一管理任务队列和线程，可以统一开始或结束任务，比单个线程逐一处理任务要更方便、更易于管理，同时也有利于数据统计，比如我们可以很方便地统计出已经执行过的任务的数量。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/tech/" rel="tag"># tech</a>
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" rel="tag"># 线程池</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/08/tech/java/concurrent/08/" rel="prev" title="08 为什么多线程会带来性能问题？">
+                  <i class="fa fa-chevron-left"></i> 08 为什么多线程会带来性能问题？
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhzh</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">117k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:46</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
