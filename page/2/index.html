@@ -160,7 +160,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -205,6 +205,209 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/11/30/tech/java/concurrent/02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpeg">
+      <meta itemprop="name" content="zhzh">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="四次元藏宝阁">
+      <meta itemprop="description" content="on the way">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 四次元藏宝阁">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/11/30/tech/java/concurrent/02/" class="post-title-link" itemprop="url">02 如何正确停止线程？为什么 volatile 标记位的停止方法是错误的？</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/" itemprop="url" rel="index"><span itemprop="name">tech</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/concurrent/" itemprop="url" rel="index"><span itemprop="name">concurrent</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在本课时我们主要学习如何正确停止一个线程？以及为什么用 volatile 标记位的停止方法是错误的？</p>
+<p>首先，我们来复习如何启动一个线程，想要启动线程需要调用 Thread 类的 start() 方法，并在 run() 方法中定义需要执行的任务。启动一个线程非常简单，但如果想要正确停止它就没那么容易了。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/11/30/tech/java/concurrent/02/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/11/29/tech/java/concurrent/01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpeg">
+      <meta itemprop="name" content="zhzh">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="四次元藏宝阁">
+      <meta itemprop="description" content="on the way">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 四次元藏宝阁">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/11/29/tech/java/concurrent/01/" class="post-title-link" itemprop="url">01 为何说只有 1 种实现线程的方法？</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/" itemprop="url" rel="index"><span itemprop="name">tech</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/concurrent/" itemprop="url" rel="index"><span itemprop="name">concurrent</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在本课时我们主要学习为什么说本质上只有一种实现线程的方式？实现 Runnable 接口究竟比继承 Thread 类实现线程好在哪里？</p>
+<p>实现线程是并发编程中基础中的基础，因为我们必须要先实现多线程，才可以继续后续的一系列操作。所以本课时就先从并发编程的基础如何实现线程开始讲起，希望你能够夯实基础，虽然实现线程看似简单、基础，但实际上却暗藏玄机。首先，我们来看下为什么说本质上实现线程只有一种方式？</p>
+<p>实现线程的方式到底有几种？大部分人会说有 2 种、3 种或是 4 种，很少有人会说有 1 种。我们接下来看看它们具体指什么？2 种实现方式的描述是最基本的，也是最为大家熟知的，我们就先来看看 2 种线程实现方式的源码。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/11/29/tech/java/concurrent/01/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -972,207 +1175,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/11/25/love/09/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.jpeg">
-      <meta itemprop="name" content="zhzh">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="四次元藏宝阁">
-      <meta itemprop="description" content="on the way">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 四次元藏宝阁">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/11/25/love/09/" class="post-title-link" itemprop="url">09 相亲与恋爱套路不一样：相亲有哪些需要注意的？</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%81%8B%E7%88%B1%E5%BF%85%E4%BF%AE%E8%AF%BE/" itemprop="url" rel="index"><span itemprop="name">恋爱必修课</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近几年，在春节期间，很多单身的男男女女回家之后，除了和家人欢聚和团圆之外，还有一个重要的任务，就是在父母亲戚的催促或者朋友的牵线下——相亲。</p>
-<p>曾经就有朋友告诉我，过年回家的时候，相亲了好几个人，最后虽然对象没找到，但是三天之内看了四遍的《流浪地球》，写的影评大受好评。</p>
-<p>这要只是多看了几遍电影，倒也还好，最怕的就是相亲碰上一些奇葩。</p>
-<p>比如说，有第一次见面就约人家姑娘晚上九点出门压马路的；有还没见过面就喊姑娘过年陪自己回农村老家的；还有第一次微信聊天就交代跟自己谈恋爱的三大纪律八项注意的。</p>
-<p>所以，一说起相亲，就总有人吐槽这些另类的、夺人眼球的奇葩体验，导致不少人对相亲心存顾虑。还有人把对长辈催婚的不满情绪代入了随后的相亲环节，产生了一些先入为主的不良印象。</p>
-<p>正是因为相亲中的这种负面体验内容频频上热搜，相亲妖魔化似乎成为了一种潮流。</p>
-<p>其实，相亲只是一种开启恋情最为常见的方式，是一种打破社交圈壁垒结识异性的有效方式，也是一种缩短试探期，加速恋情的高效方式。因此，我们既不应该妖魔化这种方式，还要正确地认识到相亲与其他恋爱模式的特殊之处，有效地利用这种模式。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/11/25/love/09/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/11/25/love/08/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.jpeg">
-      <meta itemprop="name" content="zhzh">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="四次元藏宝阁">
-      <meta itemprop="description" content="on the way">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 四次元藏宝阁">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/11/25/love/08/" class="post-title-link" itemprop="url">08 七年未必痒：如何营造亲密关系的新鲜感？</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%81%8B%E7%88%B1%E5%BF%85%E4%BF%AE%E8%AF%BE/" itemprop="url" rel="index"><span itemprop="name">恋爱必修课</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>你发现了吗？童话故事的最后，都是王子和公主从此过上了幸福的生活；很多电视剧和电影的结尾，也是只演到男女主人公走入婚姻的殿堂。可是，再往后呢，再往后就不敢写了……</p>
-<p>因为，故事在这里戛然而止，一切爱情的美好才可以停留在原地，停留在人们心里。</p>
-<p>在金庸武侠里，唯一敢于破例的就是《神雕侠侣》。射雕里古灵精怪的蓉儿妹妹成了神雕里面令人生厌的中年黄大妈、黄帮主、黄女侠，以至于我小时候读神雕一度认为是别人冒名写的。</p>
-<p>但是不得不说，在一段感情里，可悲的也莫过于此。两个人经得起轰轰烈烈的紧张冒险，却躲不过平平淡淡的似水流年。三年之痛、七年之痒，握着你的手，就像左手牵右手……</p>
-<p>之前，有很多朋友也跟我咨询过，为什么在一起久了，明明感觉自己还是很爱对方的，却总是提不起精神和另一半相处，甚至精神上会偶尔开个小差，对一些一面之缘的小姐姐却想入非非。</p>
-<p>其实，这个问题很普遍，不仅会出现在相处多年的情侣之间，也常见于恋爱的各个阶段，</p>
-<p>就比如说，两个人谈恋爱了一段时间，都觉得对方的各方面感觉还不错，可是就差了那么一点点触电的感觉。还比如说，有人留言问我，对方说和我相处像朋友多过像恋人怎么办？</p>
-<p>这些都指向同一件事——新鲜感。</p>
-<p>新鲜感有一种魔力，可以让普通人光彩照人、魅力爆棚；可以让寻常事咫尺兴波、跌宕起伏。这种魔力有多强，失去就有多痛。它可以轻松让你爱上一个人，也可以让你失去一个人。</p>
-<p>今天，我们就来探讨一下关于新鲜感的话题。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/11/25/love/08/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1195,13 +1199,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">119k</span>
+    <span title="站点总字数">127k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:49</span>
+    <span title="站点阅读时长">1:55</span>
   </span>
 </div>
 <div class="busuanzi-count">

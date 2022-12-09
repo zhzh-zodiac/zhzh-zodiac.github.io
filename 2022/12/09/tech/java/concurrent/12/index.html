@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhzh-zodiac.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.13.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在本课时我们主要学习常见的 6 种线程池，并详细讲解 Java 8 新增的 ForkJoinPool 线程池，6 种常见的线程池如下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="12 有哪 6 种常见的线程池？什么是 Java8 的 ForkJoinPool？">
+<meta property="og:url" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/index.html">
+<meta property="og:site_name" content="四次元藏宝阁">
+<meta property="og:description" content="在本课时我们主要学习常见的 6 种线程池，并详细讲解 Java 8 新增的 ForkJoinPool 线程池，6 种常见的线程池如下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_01.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_02.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_03.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_04.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_05.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_06.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_07.png">
+<meta property="og:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_08.png">
+<meta property="article:published_time" content="2022-12-09T10:06:21.000Z">
+<meta property="article:modified_time" content="2022-12-09T10:14:23.398Z">
+<meta property="article:author" content="zhzh">
+<meta property="article:tag" content="tech">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="多线程">
+<meta property="article:tag" content="线程池">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/c_12_01.png">
+
+
+<link rel="canonical" href="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/","path":"2022/12/09/tech/java/concurrent/12/","title":"12 有哪 6 种常见的线程池？什么是 Java8 的 ForkJoinPool？"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>12 有哪 6 种常见的线程池？什么是 Java8 的 ForkJoinPool？ | 四次元藏宝阁</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CDJNMEF4RB"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-CDJNMEF4RB","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fb613ad8138fa943a677dedb57bb5889"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">四次元藏宝阁</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">on the way</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-摸鱼日历"><a href="/moyu" rel="section"><i class="fa fa-calendar fa-fw"></i>摸鱼日历</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#FixedThreadPool"><span class="nav-number">1.</span> <span class="nav-text">FixedThreadPool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CachedThreadPool"><span class="nav-number">2.</span> <span class="nav-text">CachedThreadPool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ScheduledThreadPool"><span class="nav-number">3.</span> <span class="nav-text">ScheduledThreadPool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SingleThreadExecutor"><span class="nav-number">4.</span> <span class="nav-text">SingleThreadExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SingleThreadScheduledExecutor"><span class="nav-number">5.</span> <span class="nav-text">SingleThreadScheduledExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ForkJoinPool"><span class="nav-number">6.</span> <span class="nav-text">ForkJoinPool</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zhzh"
+      src="/uploads/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">zhzh</p>
+  <div class="site-description" itemprop="description">on the way</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zhzh-zodiac" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zhzh-zodiac" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zhzh-zodiac.github.io/2022/12/09/tech/java/concurrent/12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpeg">
+      <meta itemprop="name" content="zhzh">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="四次元藏宝阁">
+      <meta itemprop="description" content="on the way">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="12 有哪 6 种常见的线程池？什么是 Java8 的 ForkJoinPool？ | 四次元藏宝阁">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          12 有哪 6 种常见的线程池？什么是 Java8 的 ForkJoinPool？
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/" itemprop="url" rel="index"><span itemprop="name">tech</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tech/java/concurrent/" itemprop="url" rel="index"><span itemprop="name">concurrent</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在本课时我们主要学习常见的 6 种线程池，并详细讲解 Java 8 新增的 ForkJoinPool 线程池，6 种常见的线程池如下。</p>
+<span id="more"></span>
+
+<ul>
+<li>FixedThreadPool</li>
+<li>CachedThreadPool</li>
+<li>ScheduledThreadPool</li>
+<li>SingleThreadExecutor</li>
+<li>SingleThreadScheduledExecutor</li>
+<li>ForkJoinPool</li>
+</ul>
+<h4 id="FixedThreadPool"><a href="#FixedThreadPool" class="headerlink" title="FixedThreadPool"></a>FixedThreadPool</h4><p>第一种线程池叫作 FixedThreadPool，它的核心线程数和最大线程数是一样的，所以可以把它看作是固定线程数的线程池，它的特点是线程池中的线程数除了初始阶段需要从 0 开始增加外，之后的线程数量就是固定的，就算任务数超过线程数，线程池也不会再创建更多的线程来处理任务，而是会把超出线程处理能力的任务放到任务队列中进行等待。而且就算任务队列满了，到了本该继续增加线程数的时候，由于它的最大线程数和核心线程数是一样的，所以也无法再增加新的线程了。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_01.png" class="">
+
+<p>如图所示，线程池有 t0~t9，10 个线程，它们会不停地执行任务，如果某个线程任务执行完了，就会从任务队列中获取新的任务继续执行，期间线程数量不会增加也不会减少，始终保持在 10 个。</p>
+<h4 id="CachedThreadPool"><a href="#CachedThreadPool" class="headerlink" title="CachedThreadPool"></a>CachedThreadPool</h4><p>第二种线程池是 CachedThreadPool，可以称作可缓存线程池，它的特点在于线程数是几乎可以无限增加的（实际最大可以达到 Integer.MAX_VALUE，为 2^31-1，这个数非常大，所以基本不可能达到），而当线程闲置时还可以对线程进行回收。也就是说该线程池的线程数量不是固定不变的，当然它也有一个用于存储提交任务的队列，但这个队列是 SynchronousQueue，队列的容量为0，实际不存储任何任务，它只负责对任务进行中转和传递，所以效率比较高。</p>
+<p>当我们提交一个任务后，线程池会判断已创建的线程中是否有空闲线程，如果有空闲线程则将任务直接指派给空闲线程，如果没有空闲线程，则新建线程去执行任务，这样就做到了动态地新增线程。让我们举个例子，如下方代码所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ExecutorService</span> <span class="variable">service</span> <span class="operator">=</span> Executors.newCachedThreadPool();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123; </span><br><span class="line">        service.execute(<span class="keyword">new</span> <span class="title class_">Task</span>() &#123; </span><br><span class="line">    &#125;);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 for 循环提交 1000 个任务给 CachedThreadPool，假设这些任务处理的时间非常长，会发生什么情况呢？因为 for 循环提交任务的操作是非常快的，但执行任务却比较耗时，就可能导致 1000 个任务都提交完了但第一个任务还没有被执行完，所以此时 CachedThreadPool 就可以动态的伸缩线程数量，随着任务的提交，不停地创建 1000 个线程来执行任务，而当任务执行完之后，假设没有新的任务了，那么大量的闲置线程又会造成内存资源的浪费，这时线程池就会检测线程在 60 秒内有没有可执行任务，如果没有就会被销毁，最终线程数量会减为 0。</p>
+<h4 id="ScheduledThreadPool"><a href="#ScheduledThreadPool" class="headerlink" title="ScheduledThreadPool"></a>ScheduledThreadPool</h4><p>第三个线程池是 ScheduledThreadPool，它支持定时或周期性执行任务。比如每隔 10 秒钟执行一次任务，而实现这种功能的方法主要有 3 种，如代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScheduledExecutorService</span> <span class="variable">service</span> <span class="operator">=</span> Executors.newScheduledThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">service.schedule(<span class="keyword">new</span> <span class="title class_">Task</span>(), <span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">service.scheduleAtFixedRate(<span class="keyword">new</span> <span class="title class_">Task</span>(), <span class="number">10</span>, <span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">service.scheduleWithFixedDelay(<span class="keyword">new</span> <span class="title class_">Task</span>(), <span class="number">10</span>, <span class="number">10</span>, TimeUnit.SECONDS);</span><br></pre></td></tr></table></figure>
+
+<p>那么这 3 种方法有什么区别呢？</p>
+<ul>
+<li>第一种方法 schedule 比较简单，表示延迟指定时间后执行一次任务，如果代码中设置参数为 10 秒，也就是 10 秒后执行一次任务后就结束。</li>
+<li>第二种方法 scheduleAtFixedRate 表示以固定的频率执行任务，它的第二个参数 initialDelay 表示第一次延时时间，第三个参数 period 表示周期，也就是第一次延时后每次延时多长时间执行一次任务。</li>
+<li>第三种方法 scheduleWithFixedDelay 与第二种方法类似，也是周期执行任务，区别在于对周期的定义，之前的 scheduleAtFixedRate 是以任务开始的时间为时间起点开始计时，时间到就开始执行第二次任务，而不管任务需要花多久执行；而 scheduleWithFixedDelay 方法以任务结束的时间为下一次循环的时间起点开始计时。</li>
+</ul>
+<p>举个例子，假设某个同学正在熬夜写代码，需要喝咖啡来提神，假设每次喝咖啡都需要花10分钟的时间，如果此时采用第2种方法 scheduleAtFixedRate，时间间隔设置为 1 小时，那么他将会在每个整点喝一杯咖啡，以下是时间表：</p>
+<ul>
+<li>00:00: 开始喝咖啡</li>
+<li>00:10: 喝完了</li>
+<li>01:00: 开始喝咖啡</li>
+<li>01:10: 喝完了</li>
+<li>02:00: 开始喝咖啡</li>
+<li>02:10: 喝完了</li>
+</ul>
+<p>但是假设他采用第3种方法 scheduleWithFixedDelay，时间间隔同样设置为 1 小时，那么由于每次喝咖啡需要10分钟，而 scheduleWithFixedDelay 是以任务完成的时间为时间起点开始计时的，所以第2次喝咖啡的时间将会在1:10，而不是1:00整，以下是时间表：</p>
+<ul>
+<li>00:00: 开始喝咖啡</li>
+<li>00:10: 喝完了</li>
+<li>01:10: 开始喝咖啡</li>
+<li>01:20: 喝完了</li>
+<li>02:20: 开始喝咖啡</li>
+<li>02:30: 喝完了</li>
+</ul>
+<h4 id="SingleThreadExecutor"><a href="#SingleThreadExecutor" class="headerlink" title="SingleThreadExecutor"></a>SingleThreadExecutor</h4><p>第四种线程池是 SingleThreadExecutor，它会使用唯一的线程去执行任务，原理和 FixedThreadPool 是一样的，只不过这里线程只有一个，如果线程在执行任务的过程中发生异常，线程池也会重新创建一个线程来执行后续的任务。这种线程池由于只有一个线程，所以非常适合用于所有任务都需要按被提交的顺序依次执行的场景，而前几种线程池不一定能够保障任务的执行顺序等于被提交的顺序，因为它们是多线程并行执行的。</p>
+<h4 id="SingleThreadScheduledExecutor"><a href="#SingleThreadScheduledExecutor" class="headerlink" title="SingleThreadScheduledExecutor"></a>SingleThreadScheduledExecutor</h4><p>第五个线程池是 SingleThreadScheduledExecutor，它实际和第三种 ScheduledThreadPool 线程池非常相似，它只是 ScheduledThreadPool 的一个特例，内部只有一个线程，如源码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">ScheduledThreadPoolExecutor</span>(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>它只是将 ScheduledThreadPool 的核心线程数设置为了 1。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_02.png" class="">
+
+<p>总结上述的五种线程池，我们以核心线程数、最大线程数，以及线程存活时间三个维度进行对比，如表格所示。</p>
+<p>第一个线程池 FixedThreadPool，它的核心线程数和最大线程数都是由构造函数直接传参的，而且它们的值是相等的，所以最大线程数不会超过核心线程数，也就不需要考虑线程回收的问题，如果没有任务可执行，线程仍会在线程池中存活并等待任务。</p>
+<p>第二个线程池 CachedThreadPool 的核心线程数是 0，而它的最大线程数是 Integer 的最大值，线程数一般是达不到这么多的，所以如果任务特别多且耗时的话，CachedThreadPool 就会创建非常多的线程来应对。</p>
+<p>同理，你可以课后按照同样的方法来分析后面三种线程池的参数，来加深对知识的理解。</p>
+<h4 id="ForkJoinPool"><a href="#ForkJoinPool" class="headerlink" title="ForkJoinPool"></a>ForkJoinPool</h4><img data-src="/2022/12/09/tech/java/concurrent/12/c_12_03.png" class="">
+
+<p>最后，我们来看下第六种线程池 ForkJoinPool，这个线程池是在 JDK 7 加入的，它的名字 ForkJoin 也描述了它的执行机制，主要用法和之前的线程池是相同的，也是把任务交给线程池去执行，线程池中也有任务队列来存放任务。但是 ForkJoinPool 线程池和之前的线程池有两点非常大的不同之处。第一点它非常适合执行可以产生子任务的任务。</p>
+<p>如图所示，我们有一个 Task，这个 Task 可以产生三个子任务，三个子任务并行执行完毕后将结果汇总给 Result，比如说主任务需要执行非常繁重的计算任务，我们就可以把计算拆分成三个部分，这三个部分是互不影响相互独立的，这样就可以利用 CPU 的多核优势，并行计算，然后将结果进行汇总。这里面主要涉及两个步骤，第一步是拆分也就是 Fork，第二步是汇总也就是 Join，到这里你应该已经了解到 ForkJoinPool 线程池名字的由来了。</p>
+<p>举个例子，比如面试中经常考到的菲波那切数列，你一定非常熟悉，这个数列的特点就是后一项的结果等于前两项的和，第 0 项是 0，第 1 项是 1，那么第 2 项就是 0+1&#x3D;1，以此类推。我们在写代码时应该首选效率更高的迭代形式或者更高级的乘方或者矩阵公式法等写法，不过假设我们写成了最初版本的递归形式，伪代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (n &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">Fib</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fib</span>(n - <span class="number">1</span>);</span><br><span class="line">    <span class="type">Fib</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fib</span>(n - <span class="number">2</span>);</span><br><span class="line">    f1.solve();</span><br><span class="line">    f2.solve();</span><br><span class="line">    number = f1.number + f2.number;</span><br><span class="line">    <span class="keyword">return</span> number;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>你可以看到如果 n&lt;&#x3D;1 则直接返回 n，如果 n&gt;1 ，先将前一项 f1 的值计算出来，然后往前推两项求出 f2 的值，然后将两值相加得到结果，所以我们看到在求和运算中产生了两个子任务。计算 f(4) 的流程如下图所示。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_04.png" class="">
+
+<p>在计算 f(4) 时需要首先计算出 f(2) 和 f(3)，而同理，计算 f(3) 时又需要计算 f(1) 和 f(2)，以此类推。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_05.png" class="">
+
+<p>这是典型的递归问题，对应到我们的 ForkJoin 模式，如图所示，子任务同样会产生子子任务，最后再逐层汇总，得到最终的结果。</p>
+<p>ForkJoinPool 线程池有多种方法可以实现任务的分裂和汇总，其中一种用法如下方代码所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Fibonacci</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt; &#123; </span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Fibonacci</span><span class="params">(<span class="type">int</span> n)</span> &#123; </span><br><span class="line">        <span class="built_in">this</span>.n = n;</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123; </span><br><span class="line">        <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) &#123; </span><br><span class="line">            <span class="keyword">return</span> n;</span><br><span class="line">        &#125; </span><br><span class="line"></span><br><span class="line">        <span class="type">Fibonacci</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">1</span>);</span><br><span class="line">        f1.fork();</span><br><span class="line"></span><br><span class="line">        <span class="type">Fibonacci</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">        f2.fork();</span><br><span class="line">        <span class="keyword">return</span> f1.join() + f2.join();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到它首先继承了 RecursiveTask，RecursiveTask 类是对ForkJoinTask 的一个简单的包装，这时我们重写 compute() 方法，当 n&lt;&#x3D;1 时直接返回，当 n&gt;1 就创建递归任务，也就是 f1 和 f2，然后我们用 fork() 方法分裂任务并分别执行，最后在 return 的时候，使用 join() 方法把结果汇总，这样就实现了任务的分裂和汇总。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException &#123; </span><br><span class="line">    <span class="type">ForkJoinPool</span> <span class="variable">forkJoinPool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123; </span><br><span class="line">        <span class="type">ForkJoinTask</span> <span class="variable">task</span> <span class="operator">=</span> forkJoinPool.submit(<span class="keyword">new</span> <span class="title class_">Fibonacci</span>(i));</span><br><span class="line">        System.out.println(task.get());</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段代码将会打印出斐波那契数列的第 0 到 9 项的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="number">13</span></span><br><span class="line"></span><br><span class="line"><span class="number">21</span></span><br><span class="line"></span><br><span class="line"><span class="number">34</span></span><br></pre></td></tr></table></figure>
+
+<p>这就是 ForkJoinPool 线程池和其他线程池的第一点不同。</p>
+<p>我们来看第二点不同，第二点不同之处在于内部结构，之前的线程池所有的线程共用一个队列，但 ForkJoinPool 线程池中每个线程都有自己独立的任务队列，如图所示。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_06.png" class="">
+
+<p>ForkJoinPool 线程池内部除了有一个共用的任务队列之外，每个线程还有一个对应的双端队列 deque，这时一旦线程中的任务被 Fork 分裂了，分裂出来的子任务放入线程自己的 deque 里，而不是放入公共的任务队列中。如果此时有三个子任务放入线程 t1 的 deque 队列中，对于线程 t1 而言获取任务的成本就降低了，可以直接在自己的任务队列中获取而不必去公共队列中争抢也不会发生阻塞（除了后面会讲到的 steal 情况外），减少了线程间的竞争和切换，是非常高效的。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_07.png" class="">
+
+<p>我们再考虑一种情况，此时线程有多个，而线程 t1 的任务特别繁重，分裂了数十个子任务，但是 t0 此时却无事可做，它自己的 deque 队列为空，这时为了提高效率，t0 就会想办法帮助 t1 执行任务，这就是“work-stealing”的含义。</p>
+<p>双端队列 deque 中，线程 t1 获取任务的逻辑是后进先出，也就是LIFO（Last In Frist Out），而线程 t0 在“steal”偷线程 t1 的 deque 中的任务的逻辑是先进先出，也就是FIFO（Fast In Frist Out），如图所示，图中很好的描述了两个线程使用双端队列分别获取任务的情景。你可以看到，使用 “work-stealing” 算法和双端队列很好地平衡了各线程的负载。</p>
+<img data-src="/2022/12/09/tech/java/concurrent/12/c_12_08.png" class="">
+
+<p>最后，我们用一张全景图来描述 ForkJoinPool 线程池的内部结构，你可以看到 ForkJoinPool 线程池和其他线程池很多地方都是一样的，但重点区别在于它每个线程都有一个自己的双端队列来存储分裂出来的子任务。ForkJoinPool 非常适合用于递归的场景，例如树的遍历、最优路径搜索等场景。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/tech/" rel="tag"># tech</a>
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" rel="tag"># 线程池</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/09/tech/java/concurrent/11/" rel="prev" title="11 线程池有哪 4 种拒绝策略？">
+                  <i class="fa fa-chevron-left"></i> 11 线程池有哪 4 种拒绝策略？
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhzh</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">127k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:55</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
