@@ -1967,42 +1967,6 @@
       </tags>
   </entry>
   <entry>
-    <title>07 哪些场景需要额外注意线程安全问题？</title>
-    <url>/2022/12/08/tech/java/concurrent/07/</url>
-    <content><![CDATA[<p>在本课时我们主要学习哪些场景需要额外注意线程安全问题，在这里总结了四种场景。</p>
-<span id="more"></span>
-
-<h4 id="访问共享变量或资源"><a href="#访问共享变量或资源" class="headerlink" title="访问共享变量或资源"></a>访问共享变量或资源</h4><p>第一种场景是访问共享变量或共享资源的时候，典型的场景有访问共享对象的属性，访问 static 静态变量，访问共享的缓存，等等。因为这些信息不仅会被一个线程访问到，还有可能被多个线程同时访问，那么就有可能在并发读写的情况下发生线程安全问题。比如我们上一课时讲过的多线程同时 i++ 的例子：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 描述：     共享的变量或资源带来的线程安全问题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadNotSafe1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">Runnable</span> <span class="variable">r</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; <span class="number">10000</span>; j++) &#123;</span><br><span class="line">                    i++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">thread1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r);</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">thread2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r);</span><br><span class="line">        thread1.start();</span><br><span class="line">        thread2.start();</span><br><span class="line">        thread1.join();</span><br><span class="line">        thread2.join();</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如代码所示，两个线程同时对 i 进行 i++ 操作，最后的输出可能是 15875 等小于20000的数，而不是我们期待的20000，这便是非常典型的共享变量带来的线程安全问题。</p>
-<h4 id="依赖时序的操作"><a href="#依赖时序的操作" class="headerlink" title="依赖时序的操作"></a>依赖时序的操作</h4><p>第二个需要我们注意的场景是依赖时序的操作，如果我们操作的正确性是依赖时序的，而在多线程的情况下又不能保障执行的顺序和我们预想的一致，这个时候就会发生线程安全问题，如下面的代码所示：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (map.containsKey(key)) &#123;</span><br><span class="line">    map.remove(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码中首先检查 map 中有没有 key 对应的元素，如果有则继续执行 remove 操作。此时，这个组合操作就是危险的，因为它是先检查后操作，而执行过程中可能会被打断。如果此时有两个线程同时进入 if() 语句，然后它们都检查到存在 key 对应的元素，于是都希望执行下面的 remove 操作，随后一个线程率先把 obj 给删除了，而另外一个线程它刚已经检查过存在 key 对应的元素，if 条件成立，所以它也会继续执行删除 obj 的操作，但实际上，集合中的 obj 已经被前面的线程删除了，这种情况下就可能导致线程安全问题。</p>
-<p>类似的情况还有很多，比如我们先检查 x&#x3D;1，如果 x&#x3D;1 就修改 x 的值，代码如下所示：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (x == <span class="number">1</span>) &#123;</span><br><span class="line">    x = <span class="number">7</span> * x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样类似的场景都是同样的道理，“检查与执行”并非原子性操作，在中间可能被打断，而检查之后的结果也可能在执行时已经过期、无效，换句话说，获得正确结果取决于幸运的时序。这种情况下，我们就需要对它进行加锁等保护措施来保障操作的原子性。</p>
-<h4 id="不同数据之间存在绑定关系"><a href="#不同数据之间存在绑定关系" class="headerlink" title="不同数据之间存在绑定关系"></a>不同数据之间存在绑定关系</h4><p>第三种需要我们注意的线程安全场景是不同数据之间存在相互绑定关系的情况。有时候，我们的不同数据之间是成组出现的，存在着相互对应或绑定的关系，最典型的就是 IP 和端口号。有时候我们更换了 IP，往往需要同时更换端口号，如果没有把这两个操作绑定在一起，就有可能出现单独更换了 IP 或端口号的情况，而此时信息如果已经对外发布，信息获取方就有可能获取一个错误的 IP 与端口绑定情况，这时就发生了线程安全问题。在这种情况下，我们也同样需要保障操作的原子性。</p>
-<h4 id="对方没有声明自己是线程安全的"><a href="#对方没有声明自己是线程安全的" class="headerlink" title="对方没有声明自己是线程安全的"></a>对方没有声明自己是线程安全的</h4><p>第四种值得注意的场景是在我们使用其他类时，如果对方没有声明自己是线程安全的，那么这种情况下对其他类进行多线程的并发操作，就有可能会发生线程安全问题。举个例子，比如说我们定义了 ArrayList，它本身并不是线程安全的，如果此时多个线程同时对 ArrayList 进行并发读&#x2F;写，那么就有可能会产生线程安全问题，造成数据出错，而这个责任并不在 ArrayList，因为它本身并不是并发安全的，正如源码注释所写的：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Note that <span class="built_in">this</span> implementation is not <span class="keyword">synchronized</span>. If multiple threads</span><br><span class="line">access an ArrayList instance concurrently, and at least one of the threads</span><br><span class="line">modifies the list structurally, it must be <span class="keyword">synchronized</span> externally.</span><br></pre></td></tr></table></figure>
-
-<p>这段话的意思是说，如果我们把 ArrayList 用在了多线程的场景，需要在外部手动用 synchronized 等方式保证并发安全。</p>
-<p>所以 ArrayList 默认不适合并发读写，是我们错误地使用了它，导致了线程安全问题。所以，我们在使用其他类时如果会涉及并发场景，那么一定要首先确认清楚，对方是否支持并发操作，以上就是四种需要我们额外注意线程安全问题的场景，分别是访问共享变量或资源，依赖时序的操作，不同数据之间存在绑定关系，以及对方没有声明自己是线程安全的。</p>
-]]></content>
-      <categories>
-        <category>tech</category>
-        <category>java</category>
-        <category>concurrent</category>
-      </categories>
-      <tags>
-        <tag>tech</tag>
-        <tag>java</tag>
-        <tag>线程安全</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>06 一共有哪 3 类线程安全问题？</title>
     <url>/2022/12/06/tech/java/concurrent/06/</url>
     <content><![CDATA[<p>本课时我们学习 3 类线程安全问题。</p>
@@ -2056,6 +2020,42 @@
 <p>举一个例子，假设有一个消息队列，队列里放着各种各样需要被处理的消息，而某个消息由于自身被写错了导致不能被正确处理，执行时会报错，可是队列的重试机制会重新把它放在队列头进行优先重试处理，但这个消息本身无论被执行多少次，都无法被正确处理，每次报错后又会被放到队列头进行重试，周而复始，最终导致线程一直处于忙碌状态，但程序始终得不到结果，便发生了活锁问题。</p>
 <h5 id="饥饿"><a href="#饥饿" class="headerlink" title="饥饿"></a>饥饿</h5><p>第三个典型的活跃性问题是饥饿，饥饿是指线程需要某些资源时始终得不到，尤其是CPU 资源，就会导致线程一直不能运行而产生的问题。在 Java 中有线程优先级的概念，Java 中优先级分为 1 到 10，1 最低，10 最高。如果我们把某个线程的优先级设置为 1，这是最低的优先级，在这种情况下，这个线程就有可能始终分配不到 CPU 资源，而导致长时间无法运行。或者是某个线程始终持有某个文件的锁，而其他线程想要修改文件就必须先获取锁，这样想要修改文件的线程就会陷入饥饿，长时间不能运行。</p>
 <p>好了，今天的内容就全部讲完了，通过本课时的学习我们知道了线程安全问题主要有 3 种，i++ 等情况导致的运行结果错误，通常是因为并发读写导致的，第二种是对象没有在正确的时间、地点被发布或初始化，而第三种线程安全问题就是活跃性问题，包括死锁、活锁和饥饿。</p>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>线程安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>07 哪些场景需要额外注意线程安全问题？</title>
+    <url>/2022/12/08/tech/java/concurrent/07/</url>
+    <content><![CDATA[<p>在本课时我们主要学习哪些场景需要额外注意线程安全问题，在这里总结了四种场景。</p>
+<span id="more"></span>
+
+<h4 id="访问共享变量或资源"><a href="#访问共享变量或资源" class="headerlink" title="访问共享变量或资源"></a>访问共享变量或资源</h4><p>第一种场景是访问共享变量或共享资源的时候，典型的场景有访问共享对象的属性，访问 static 静态变量，访问共享的缓存，等等。因为这些信息不仅会被一个线程访问到，还有可能被多个线程同时访问，那么就有可能在并发读写的情况下发生线程安全问题。比如我们上一课时讲过的多线程同时 i++ 的例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 描述：     共享的变量或资源带来的线程安全问题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadNotSafe1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">Runnable</span> <span class="variable">r</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; <span class="number">10000</span>; j++) &#123;</span><br><span class="line">                    i++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">thread1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r);</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">thread2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r);</span><br><span class="line">        thread1.start();</span><br><span class="line">        thread2.start();</span><br><span class="line">        thread1.join();</span><br><span class="line">        thread2.join();</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如代码所示，两个线程同时对 i 进行 i++ 操作，最后的输出可能是 15875 等小于20000的数，而不是我们期待的20000，这便是非常典型的共享变量带来的线程安全问题。</p>
+<h4 id="依赖时序的操作"><a href="#依赖时序的操作" class="headerlink" title="依赖时序的操作"></a>依赖时序的操作</h4><p>第二个需要我们注意的场景是依赖时序的操作，如果我们操作的正确性是依赖时序的，而在多线程的情况下又不能保障执行的顺序和我们预想的一致，这个时候就会发生线程安全问题，如下面的代码所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (map.containsKey(key)) &#123;</span><br><span class="line">    map.remove(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码中首先检查 map 中有没有 key 对应的元素，如果有则继续执行 remove 操作。此时，这个组合操作就是危险的，因为它是先检查后操作，而执行过程中可能会被打断。如果此时有两个线程同时进入 if() 语句，然后它们都检查到存在 key 对应的元素，于是都希望执行下面的 remove 操作，随后一个线程率先把 obj 给删除了，而另外一个线程它刚已经检查过存在 key 对应的元素，if 条件成立，所以它也会继续执行删除 obj 的操作，但实际上，集合中的 obj 已经被前面的线程删除了，这种情况下就可能导致线程安全问题。</p>
+<p>类似的情况还有很多，比如我们先检查 x&#x3D;1，如果 x&#x3D;1 就修改 x 的值，代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (x == <span class="number">1</span>) &#123;</span><br><span class="line">    x = <span class="number">7</span> * x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样类似的场景都是同样的道理，“检查与执行”并非原子性操作，在中间可能被打断，而检查之后的结果也可能在执行时已经过期、无效，换句话说，获得正确结果取决于幸运的时序。这种情况下，我们就需要对它进行加锁等保护措施来保障操作的原子性。</p>
+<h4 id="不同数据之间存在绑定关系"><a href="#不同数据之间存在绑定关系" class="headerlink" title="不同数据之间存在绑定关系"></a>不同数据之间存在绑定关系</h4><p>第三种需要我们注意的线程安全场景是不同数据之间存在相互绑定关系的情况。有时候，我们的不同数据之间是成组出现的，存在着相互对应或绑定的关系，最典型的就是 IP 和端口号。有时候我们更换了 IP，往往需要同时更换端口号，如果没有把这两个操作绑定在一起，就有可能出现单独更换了 IP 或端口号的情况，而此时信息如果已经对外发布，信息获取方就有可能获取一个错误的 IP 与端口绑定情况，这时就发生了线程安全问题。在这种情况下，我们也同样需要保障操作的原子性。</p>
+<h4 id="对方没有声明自己是线程安全的"><a href="#对方没有声明自己是线程安全的" class="headerlink" title="对方没有声明自己是线程安全的"></a>对方没有声明自己是线程安全的</h4><p>第四种值得注意的场景是在我们使用其他类时，如果对方没有声明自己是线程安全的，那么这种情况下对其他类进行多线程的并发操作，就有可能会发生线程安全问题。举个例子，比如说我们定义了 ArrayList，它本身并不是线程安全的，如果此时多个线程同时对 ArrayList 进行并发读&#x2F;写，那么就有可能会产生线程安全问题，造成数据出错，而这个责任并不在 ArrayList，因为它本身并不是并发安全的，正如源码注释所写的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Note that <span class="built_in">this</span> implementation is not <span class="keyword">synchronized</span>. If multiple threads</span><br><span class="line">access an ArrayList instance concurrently, and at least one of the threads</span><br><span class="line">modifies the list structurally, it must be <span class="keyword">synchronized</span> externally.</span><br></pre></td></tr></table></figure>
+
+<p>这段话的意思是说，如果我们把 ArrayList 用在了多线程的场景，需要在外部手动用 synchronized 等方式保证并发安全。</p>
+<p>所以 ArrayList 默认不适合并发读写，是我们错误地使用了它，导致了线程安全问题。所以，我们在使用其他类时如果会涉及并发场景，那么一定要首先确认清楚，对方是否支持并发操作，以上就是四种需要我们额外注意线程安全问题的场景，分别是访问共享变量或资源，依赖时序的操作，不同数据之间存在绑定关系，以及对方没有声明自己是线程安全的。</p>
 ]]></content>
       <categories>
         <category>tech</category>
@@ -2341,7 +2341,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException &#123; </span><br><span class="line">    <span class="type">ForkJoinPool</span> <span class="variable">forkJoinPool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123; </span><br><span class="line">        <span class="type">ForkJoinTask</span> <span class="variable">task</span> <span class="operator">=</span> forkJoinPool.submit(<span class="keyword">new</span> <span class="title class_">Fibonacci</span>(i));</span><br><span class="line">        System.out.println(task.get());</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>上面这段代码将会打印出斐波那契数列的第 0 到 9 项的值：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="number">13</span></span><br><span class="line"></span><br><span class="line"><span class="number">21</span></span><br><span class="line"></span><br><span class="line"><span class="number">34</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">8</span></span><br><span class="line"><span class="number">13</span></span><br><span class="line"><span class="number">21</span></span><br><span class="line"><span class="number">34</span></span><br></pre></td></tr></table></figure>
 
 <p>这就是 ForkJoinPool 线程池和其他线程池的第一点不同。</p>
 <p>我们来看第二点不同，第二点不同之处在于内部结构，之前的线程池所有的线程共用一个队列，但 ForkJoinPool 线程池中每个线程都有自己独立的任务队列，如图所示。</p>
@@ -2355,6 +2355,81 @@
 <img data-src="/2022/12/09/tech/java/concurrent/12/c_12_08.png" class="">
 
 <p>最后，我们用一张全景图来描述 ForkJoinPool 线程池的内部结构，你可以看到 ForkJoinPool 线程池和其他线程池很多地方都是一样的，但重点区别在于它每个线程都有一个自己的双端队列来存储分裂出来的子任务。ForkJoinPool 非常适合用于递归的场景，例如树的遍历、最优路径搜索等场景。</p>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>多线程</tag>
+        <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>13 线程池常用的阻塞队列有哪些？</title>
+    <url>/2022/12/12/tech/java/concurrent/13/</url>
+    <content><![CDATA[<p>在本课时我们主要学习线程池内部结构，以及线程池中最常见的阻塞队列类型。</p>
+<span id="more"></span>
+
+<h4 id="线程池内部结构"><a href="#线程池内部结构" class="headerlink" title="线程池内部结构"></a>线程池内部结构</h4><img data-src="/2022/12/12/tech/java/concurrent/13/c_13_01.png" class="">
+
+<p>线程池的内部结构主要由四部分组成，如图所示。</p>
+<ul>
+<li>第一部分是线程池管理器，它主要负责管理线程池的创建、销毁、添加任务等管理操作，它是整个线程池的管家。</li>
+<li>第二部分是工作线程，也就是图中的线程 t0~t9，这些线程勤勤恳恳地从任务队列中获取任务并执行。</li>
+<li>第三部分是任务队列，作为一种缓冲机制，线程池会把当下没有处理的任务放入任务队列中，由于多线程同时从任务队列中获取任务是并发场景，此时就需要任务队列满足线程安全的要求，所以线程池中任务队列采用 BlockingQueue 来保障线程安全。</li>
+<li>第四部分是任务，任务要求实现统一的接口，以便工作线程可以处理和执行。</li>
+</ul>
+<h4 id="阻塞队列"><a href="#阻塞队列" class="headerlink" title="阻塞队列"></a>阻塞队列</h4><img data-src="/2022/12/12/tech/java/concurrent/13/c_13_02.png" class="">
+
+<p>线程池中的这四个主要组成部分最值得我们关注的就是阻塞队列了，如表格所示，不同的线程池会选用不同的阻塞队列。</p>
+<p>表格左侧是线程池，右侧为它们对应的阻塞队列，你可以看到 5 种线程池对应了 3 种阻塞队列，我们接下来对它们进行逐一的介绍。</p>
+<h4 id="LinkedBlockingQueue"><a href="#LinkedBlockingQueue" class="headerlink" title="LinkedBlockingQueue"></a>LinkedBlockingQueue</h4><p>对于 FixedThreadPool 和 SingleThreadExector 而言，它们使用的阻塞队列是容量为 Integer.MAX_VALUE 的 LinkedBlockingQueue，可以认为是无界队列。由于 FixedThreadPool 线程池的线程数是固定的，所以没有办法增加特别多的线程来处理任务，这时就需要 LinkedBlockingQueue 这样一个没有容量限制的阻塞队列来存放任务。这里需要注意，由于线程池的任务队列永远不会放满，所以线程池只会创建核心线程数量的线程，所以此时的最大线程数对线程池来说没有意义，因为并不会触发生成多于核心线程数的线程。</p>
+<h4 id="SynchronousQueue"><a href="#SynchronousQueue" class="headerlink" title="SynchronousQueue"></a>SynchronousQueue</h4><p>第二种阻塞队列是 SynchronousQueue，对应的线程池是 CachedThreadPool。线程池 CachedThreadPool 的最大线程数是 Integer 的最大值，可以理解为线程数是可以无限扩展的。CachedThreadPool 和上一种线程池 FixedThreadPool 的情况恰恰相反，FixedThreadPool 的情况是阻塞队列的容量是无限的，而这里 CachedThreadPool 是线程数可以无限扩展，所以 CachedThreadPool 线程池并不需要一个任务队列来存储任务，因为一旦有任务被提交就直接转发给线程或者创建新线程来执行，而不需要另外保存它们。</p>
+<p>我们自己创建使用 SynchronousQueue 的线程池时，如果不希望任务被拒绝，那么就需要注意设置最大线程数要尽可能大一些，以免发生任务数大于最大线程数时，没办法把任务放到队列中也没有足够线程来执行任务的情况。</p>
+<h4 id="DelayedWorkQueue"><a href="#DelayedWorkQueue" class="headerlink" title="DelayedWorkQueue"></a>DelayedWorkQueue</h4><p>第三种阻塞队列是DelayedWorkQueue，它对应的线程池分别是 ScheduledThreadPool 和 SingleThreadScheduledExecutor，这两种线程池的最大特点就是可以延迟执行任务，比如说一定时间后执行任务或是每隔一定的时间执行一次任务。DelayedWorkQueue 的特点是内部元素并不是按照放入的时间排序，而是会按照延迟的时间长短对任务进行排序，内部采用的是“堆”的数据结构。之所以线程池 ScheduledThreadPool 和 SingleThreadScheduledExecutor 选择 DelayedWorkQueue，是因为它们本身正是基于时间执行任务的，而延迟队列正好可以把任务按时间进行排序，方便任务的执行。</p>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>线程池</tag>
+        <tag>阻塞队列</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>14 为什么不应该自动创建线程池？</title>
+    <url>/2022/12/12/tech/java/concurrent/14/</url>
+    <content><![CDATA[<p>在本课时我们主要学习为什么不应该自动创建线程池，所谓的自动创建线程池就是直接调用 Executors 的各种方法来生成前面学过的常见的线程池，例如 Executors.newCachedThreadPool()。但这样做是有一定风险的，接下来我们就来逐一分析自动创建线程池可能带来哪些问题。</p>
+<span id="more"></span>
+
+<h4 id="FixedThreadPool"><a href="#FixedThreadPool" class="headerlink" title="FixedThreadPool"></a>FixedThreadPool</h4><p>首先我们来看第一种线程池 FixedThreadPool， 它是线程数量固定的线程池，如源码所示，newFixedThreadPool 内部实际还是调用了 ThreadPoolExecutor 构造函数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newFixedThreadPool</span><span class="params">(<span class="type">int</span> nThreads)</span> &#123; </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(nThreads, nThreads,<span class="number">0L</span>, TimeUnit.MILLISECONDS,<span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过往构造函数中传参，创建了一个核心线程数和最大线程数相等的线程池，它们的数量也就是我们传入的参数，这里的重点是使用的队列是容量没有上限的 LinkedBlockingQueue，如果我们对任务的处理速度比较慢，那么随着请求的增多，队列中堆积的任务也会越来越多，最终大量堆积的任务会占用大量内存，并发生 OOM ，也就是OutOfMemoryError，这几乎会影响到整个程序，会造成很严重的后果。</p>
+<h4 id="SingleThreadExecutor"><a href="#SingleThreadExecutor" class="headerlink" title="SingleThreadExecutor"></a>SingleThreadExecutor</h4><p>第二种线程池是 SingleThreadExecutor，我们来分析下创建它的源码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newSingleThreadExecutor</span><span class="params">()</span> &#123; </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FinalizableDelegatedExecutorService</span> (<span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(<span class="number">1</span>, <span class="number">1</span>,<span class="number">0L</span>, TimeUnit.MILLISECONDS,<span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;Runnable&gt;()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>你可以看出，newSingleThreadExecutor 和 newFixedThreadPool 的原理是一样的，只不过把核心线程数和最大线程数都直接设置成了 1，但是任务队列仍是无界的 LinkedBlockingQueue，所以也会导致同样的问题，也就是当任务堆积时，可能会占用大量的内存并导致 OOM。</p>
+<h4 id="CachedThreadPool"><a href="#CachedThreadPool" class="headerlink" title="CachedThreadPool"></a>CachedThreadPool</h4><p>第三种线程池是 CachedThreadPool，创建它的源码下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newCachedThreadPool</span><span class="params">()</span> &#123; </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(<span class="number">0</span>, Integer.MAX_VALUE,<span class="number">60L</span>, TimeUnit.SECONDS,<span class="keyword">new</span> <span class="title class_">SynchronousQueue</span>&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的 CachedThreadPool 和前面两种线程池不一样的地方在于任务队列使用的是 SynchronousQueue，SynchronousQueue 本身并不存储任务，而是对任务直接进行转发，这本身是没有问题的，但你会发现构造函数的第二个参数被设置成了 Integer.MAX_VALUE，这个参数的含义是最大线程数，所以由于 CachedThreadPool 并不限制线程的数量，当任务数量特别多的时候，就可能会导致创建非常多的线程，最终超过了操作系统的上限而无法创建新线程，或者导致内存不足。</p>
+<h4 id="ScheduledThreadPool-和-SingleThreadScheduledExecutor"><a href="#ScheduledThreadPool-和-SingleThreadScheduledExecutor" class="headerlink" title="ScheduledThreadPool 和 SingleThreadScheduledExecutor"></a>ScheduledThreadPool 和 SingleThreadScheduledExecutor</h4><p>第四种线程池 ScheduledThreadPool 和第五种线程池 SingleThreadScheduledExecutor 的原理是一样的，创建 ScheduledThreadPool 的源码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ScheduledExecutorService <span class="title function_">newScheduledThreadPool</span><span class="params">(<span class="type">int</span> corePoolSize)</span> &#123; </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ScheduledThreadPoolExecutor</span>(corePoolSize);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而这里的 ScheduledThreadPoolExecutor 是 ThreadPoolExecutor 的子类，调用的它的构造方法如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ScheduledThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize)</span> &#123; </span><br><span class="line">    <span class="built_in">super</span>(corePoolSize, Integer.MAX_VALUE, <span class="number">0</span>, NANOSECONDS,<span class="keyword">new</span> <span class="title class_">DelayedWorkQueue</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们通过源码可以看出，它采用的任务队列是 DelayedWorkQueue，这是一个延迟队列，同时也是一个无界队列，所以和 LinkedBlockingQueue 一样，如果队列中存放过多的任务，就可能导致 OOM。</p>
+<p>你可以看到，这几种自动创建的线程池都存在风险，相比较而言，我们自己手动创建会更好，因为我们可以更加明确线程池的运行规则，不仅可以选择适合自己的线程数量，更可以在必要的时候拒绝新任务的提交，避免资源耗尽的风险。</p>
 ]]></content>
       <categories>
         <category>tech</category>
