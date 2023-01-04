@@ -2405,42 +2405,6 @@
       </tags>
   </entry>
   <entry>
-    <title>15 合适的线程数量是多少？CPU 核心数和线程数的关系？</title>
-    <url>/2022/12/14/tech/java/concurrent/15/</url>
-    <content><![CDATA[<p>在本课时我们主要学习合适的线程数量是多少，以及 CPU 核心数和线程数的关系。</p>
-<blockquote>
-<p>你可能经常在面试中被问到这两个问题，如果想要很好地回答它们首先你需要了解，我们调整线程池中的线程数量的最主要的目的是为了充分并合理地使用 CPU 和内存等资源，从而最大限度地提高程序的性能。在实际工作中，我们需要根据任务类型的不同选择对应的策略。</p>
-</blockquote>
-<span id="more"></span>
-
-<h4 id="CPU-密集型任务"><a href="#CPU-密集型任务" class="headerlink" title="CPU 密集型任务"></a>CPU 密集型任务</h4><p>首先，我们来看 CPU 密集型任务，比如加密、解密、压缩、计算等一系列需要大量耗费 CPU 资源的任务。对于这样的任务最佳的线程数为 CPU 核心数的 1~2 倍，如果设置过多的线程数，实际上并不会起到很好的效果。此时假设我们设置的线程数量是 CPU 核心数的 2 倍以上，因为计算任务非常重，会占用大量的 CPU 资源，所以这时 CPU 的每个核心工作基本都是满负荷的，而我们又设置了过多的线程，每个线程都想去利用 CPU 资源来执行自己的任务，这就会造成不必要的上下文切换，此时线程数的增多并没有让性能提升，反而由于线程数量过多会导致性能下降。</p>
-<p>针对这种情况，我们最好还要同时考虑在同一台机器上还有哪些其他会占用过多 CPU 资源的程序在运行，然后对资源使用做整体的平衡。</p>
-<h4 id="耗时-IO-型任务"><a href="#耗时-IO-型任务" class="headerlink" title="耗时 IO 型任务"></a>耗时 IO 型任务</h4><p>第二种任务是耗时 IO 型，比如数据库、文件的读写，网络通信等任务，这种任务的特点是并不会特别消耗 CPU 资源，但是 IO 操作很耗时，总体会占用比较多的时间。对于这种任务最大线程数一般会大于 CPU 核心数很多倍，因为 IO 读写速度相比于 CPU 的速度而言是比较慢的，如果我们设置过少的线程数，就可能导致 CPU 资源的浪费。而如果我们设置更多的线程数，那么当一部分线程正在等待 IO 的时候，它们此时并不需要 CPU 来计算，那么另外的线程便可以利用 CPU 去执行其他的任务，互不影响，这样的话在任务队列中等待的任务就会减少，可以更好地利用资源。</p>
-<p>《Java并发编程实战》的作者 Brain Goetz 推荐的计算方法：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">线程数 = CPU 核心数 *（1+平均等待时间/平均工作时间）</span><br></pre></td></tr></table></figure>
-
-<p>通过这个公式，我们可以计算出一个合理的线程数量，如果任务的平均等待时间长，线程数就随之增加，而如果平均工作时间长，也就是对于我们上面的 CPU 密集型任务，线程数就随之减少。</p>
-<p>太少的线程数会使得程序整体性能降低，而过多的线程也会消耗内存等其他资源，所以如果想要更准确的话，可以进行压测，监控 JVM 的线程情况以及 CPU 的负载情况，根据实际情况衡量应该创建的线程数，合理并充分利用资源。</p>
-<h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>综上所述我们就可以得出一个结论：</p>
-<ul>
-<li>线程的平均工作时间所占比例越高，就需要越少的线程；</li>
-<li>线程的平均等待时间所占比例越高，就需要越多的线程；</li>
-<li>针对不同的程序，进行对应的实际测试就可以得到最合适的选择。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>tech</category>
-        <category>java</category>
-        <category>concurrent</category>
-      </categories>
-      <tags>
-        <tag>tech</tag>
-        <tag>java</tag>
-        <tag>多线程</tag>
-        <tag>线程数量</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>14 为什么不应该自动创建线程池？</title>
     <url>/2022/12/12/tech/java/concurrent/14/</url>
     <content><![CDATA[<p>在本课时我们主要学习为什么不应该自动创建线程池，所谓的自动创建线程池就是直接调用 Executors 的各种方法来生成前面学过的常见的线程池，例如 Executors.newCachedThreadPool()。但这样做是有一定风险的，接下来我们就来逐一分析自动创建线程池可能带来哪些问题。</p>
@@ -2477,6 +2441,42 @@
         <tag>java</tag>
         <tag>多线程</tag>
         <tag>线程池</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>15 合适的线程数量是多少？CPU 核心数和线程数的关系？</title>
+    <url>/2022/12/14/tech/java/concurrent/15/</url>
+    <content><![CDATA[<p>在本课时我们主要学习合适的线程数量是多少，以及 CPU 核心数和线程数的关系。</p>
+<blockquote>
+<p>你可能经常在面试中被问到这两个问题，如果想要很好地回答它们首先你需要了解，我们调整线程池中的线程数量的最主要的目的是为了充分并合理地使用 CPU 和内存等资源，从而最大限度地提高程序的性能。在实际工作中，我们需要根据任务类型的不同选择对应的策略。</p>
+</blockquote>
+<span id="more"></span>
+
+<h4 id="CPU-密集型任务"><a href="#CPU-密集型任务" class="headerlink" title="CPU 密集型任务"></a>CPU 密集型任务</h4><p>首先，我们来看 CPU 密集型任务，比如加密、解密、压缩、计算等一系列需要大量耗费 CPU 资源的任务。对于这样的任务最佳的线程数为 CPU 核心数的 1~2 倍，如果设置过多的线程数，实际上并不会起到很好的效果。此时假设我们设置的线程数量是 CPU 核心数的 2 倍以上，因为计算任务非常重，会占用大量的 CPU 资源，所以这时 CPU 的每个核心工作基本都是满负荷的，而我们又设置了过多的线程，每个线程都想去利用 CPU 资源来执行自己的任务，这就会造成不必要的上下文切换，此时线程数的增多并没有让性能提升，反而由于线程数量过多会导致性能下降。</p>
+<p>针对这种情况，我们最好还要同时考虑在同一台机器上还有哪些其他会占用过多 CPU 资源的程序在运行，然后对资源使用做整体的平衡。</p>
+<h4 id="耗时-IO-型任务"><a href="#耗时-IO-型任务" class="headerlink" title="耗时 IO 型任务"></a>耗时 IO 型任务</h4><p>第二种任务是耗时 IO 型，比如数据库、文件的读写，网络通信等任务，这种任务的特点是并不会特别消耗 CPU 资源，但是 IO 操作很耗时，总体会占用比较多的时间。对于这种任务最大线程数一般会大于 CPU 核心数很多倍，因为 IO 读写速度相比于 CPU 的速度而言是比较慢的，如果我们设置过少的线程数，就可能导致 CPU 资源的浪费。而如果我们设置更多的线程数，那么当一部分线程正在等待 IO 的时候，它们此时并不需要 CPU 来计算，那么另外的线程便可以利用 CPU 去执行其他的任务，互不影响，这样的话在任务队列中等待的任务就会减少，可以更好地利用资源。</p>
+<p>《Java并发编程实战》的作者 Brain Goetz 推荐的计算方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">线程数 = CPU 核心数 *（1+平均等待时间/平均工作时间）</span><br></pre></td></tr></table></figure>
+
+<p>通过这个公式，我们可以计算出一个合理的线程数量，如果任务的平均等待时间长，线程数就随之增加，而如果平均工作时间长，也就是对于我们上面的 CPU 密集型任务，线程数就随之减少。</p>
+<p>太少的线程数会使得程序整体性能降低，而过多的线程也会消耗内存等其他资源，所以如果想要更准确的话，可以进行压测，监控 JVM 的线程情况以及 CPU 的负载情况，根据实际情况衡量应该创建的线程数，合理并充分利用资源。</p>
+<h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>综上所述我们就可以得出一个结论：</p>
+<ul>
+<li>线程的平均工作时间所占比例越高，就需要越少的线程；</li>
+<li>线程的平均等待时间所占比例越高，就需要越多的线程；</li>
+<li>针对不同的程序，进行对应的实际测试就可以得到最合适的选择。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>多线程</tag>
+        <tag>线程数量</tag>
       </tags>
   </entry>
   <entry>
@@ -2663,6 +2663,61 @@
       </tags>
   </entry>
   <entry>
+    <title>21 如何看到 synchronized 背后的“monitor 锁”？</title>
+    <url>/2022/12/30/tech/java/concurrent/21/</url>
+    <content><![CDATA[<p>本课时我们研究下 synchronized 背后的 monitor 锁。</p>
+<span id="more"></span>
+
+<h4 id="获取和释放-monitor-锁的时机"><a href="#获取和释放-monitor-锁的时机" class="headerlink" title="获取和释放 monitor 锁的时机"></a>获取和释放 monitor 锁的时机</h4><p>我们都知道，最简单的同步方式就是利用 synchronized 关键字来修饰代码块或者修饰一个方法，那么这部分被保护的代码，在同一时刻就最多只有一个线程可以运行，而 synchronized 的背后正是利用 monitor 锁实现的。所以首先我们来看下获取和释放 monitor 锁的时机，每个 Java 对象都可以用作一个实现同步的锁，这个锁也被称为内置锁或 monitor 锁，获得 monitor 锁的唯一途径就是进入由这个锁保护的同步代码块或同步方法，线程在进入被 synchronized 保护的代码块之前，会自动获取锁，并且无论是正常路径退出，还是通过抛出异常退出，在退出的时候都会自动释放锁。</p>
+<p>我们首先来看一个 synchronized 修饰方法的代码的例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    method body</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到 method() 方法是被 synchronized 修饰的，为了方便理解其背后的原理，我们把上面这段代码改写为下面这种等价形式的伪代码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.intrinsicLock.lock();</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        method body</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.intrinsicLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这种写法中，进入 method 方法后，立刻添加内置锁，并且用 try 代码块把方法保护起来，最后用 finally 释放这把锁，这里的 intrinsicLock 就是 monitor 锁。经过这样的伪代码展开之后，相信你对 synchronized 的理解就更加清晰了。</p>
+<h4 id="用-javap-命令查看反汇编的结果"><a href="#用-javap-命令查看反汇编的结果" class="headerlink" title="用 javap 命令查看反汇编的结果"></a>用 javap 命令查看反汇编的结果</h4><p>JVM 实现 synchronized 方法和 synchronized 代码块的细节是不一样的，下面我们就分别来看一下两者的实现。</p>
+<h5 id="同步代码块"><a href="#同步代码块" class="headerlink" title="同步代码块"></a>同步代码块</h5><p>首先我们来看下同步代码块的实现，如代码所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SynTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">synBlock</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;csdn&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 SynTest 类中的 synBlock 方法，包含一个同步代码块，synchronized 代码块中有一行代码打印了 csdn 字符串，下面我们来通过命令看下 synchronized 关键字到底做了什么事情：首先用 cd 命令切换到 SynTest.java 类所在的路径，然后执行 <code>javac SynTest.java</code>，于是就会产生一个名为 SynTest.class 的字节码文件，然后我们执行 <code>javap -verbose SynTest.class</code>，就可以看到对应的反汇编内容。</p>
+<p>关键信息如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void synBlock();</span><br><span class="line"></span><br><span class="line">    descriptor: ()V</span><br><span class="line"></span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line"></span><br><span class="line">    Code:</span><br><span class="line"></span><br><span class="line">      stack=2, locals=3, args_size=1</span><br><span class="line"></span><br><span class="line">         0: aload_0</span><br><span class="line"></span><br><span class="line">         1: dup</span><br><span class="line"></span><br><span class="line">         2: astore_1</span><br><span class="line"></span><br><span class="line">         3: monitorenter</span><br><span class="line"></span><br><span class="line">         4: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line"></span><br><span class="line">         7: ldc           #3                      // String lagou</span><br><span class="line"></span><br><span class="line">         9: invokevirtual #4               // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line"></span><br><span class="line">        12: aload_1</span><br><span class="line"></span><br><span class="line">        13: monitorexit</span><br><span class="line"></span><br><span class="line">        14: goto          22</span><br><span class="line"></span><br><span class="line">        17: astore_2</span><br><span class="line"></span><br><span class="line">        18: aload_1</span><br><span class="line"></span><br><span class="line">        19: monitorexit</span><br><span class="line"></span><br><span class="line">        20: aload_2</span><br><span class="line"></span><br><span class="line">        21: athrow</span><br><span class="line"></span><br><span class="line">        22: return</span><br></pre></td></tr></table></figure>
+
+<p>从里面可以看出，synchronized 代码块实际上多了 monitorenter 和 monitorexit 指令，标红的第3、13、19行指令分别对应的是 monitorenter 和 monitorexit。这里有一个 monitorenter，却有两个 monitorexit 指令的原因是，JVM 要保证每个 monitorenter 必须有与之对应的 monitorexit，monitorenter 指令被插入到同步代码块的开始位置，而 monitorexit 需要插入到方法正常结束处和异常处两个地方，这样就可以保证抛异常的情况下也能释放锁</p>
+<p>可以把执行 monitorenter 理解为加锁，执行 monitorexit 理解为释放锁，每个对象维护着一个记录着被锁次数的计数器。未被锁定的对象的该计数器为 0，我们来具体看一下 monitorenter 和 monitorexit 的含义：</p>
+<ul>
+<li>monitorenter</li>
+</ul>
+<p>执行 monitorenter 的线程尝试获得 monitor 的所有权，会发生以下这三种情况之一：</p>
+<p>a. 如果该 monitor 的计数为 0，则线程获得该 monitor 并将其计数设置为 1。然后，该线程就是这个 monitor 的所有者。</p>
+<p>b. 如果线程已经拥有了这个 monitor ，则它将重新进入，并且累加计数。</p>
+<p>c. 如果其他线程已经拥有了这个 monitor，那个这个线程就会被阻塞，直到这个 monitor 的计数变成为 0，代表这个 monitor 已经被释放了，于是当前这个线程就会再次尝试获取这个 monitor。</p>
+<ul>
+<li>monitorexit monitorexit 的作用是将 monitor 的计数器减 1，直到减为 0 为止。代表这个 monitor 已经被释放了，已经没有任何线程拥有它了，也就代表着解锁，所以，其他正在等待这个 monitor 的线程，此时便可以再次尝试获取这个 monitor 的所有权。</li>
+</ul>
+<h4 id="同步方法"><a href="#同步方法" class="headerlink" title="同步方法"></a>同步方法</h4><p>从上面可以看出，同步代码块是使用 monitorenter 和 monitorexit 指令实现的。而对于 synchronized 方法，并不是依靠 monitorenter 和 monitorexit 指令实现的，被 javap 反汇编后可以看到，synchronized 方法和普通方法大部分是一样的，不同在于，这个方法会有一个叫作 ACC_SYNCHRONIZED 的 flag 修饰符，来表明它是同步方法。</p>
+<p>同步方法的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">synMethod</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的反汇编指令如下所示。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public synchronized void synMethod();</span><br><span class="line"></span><br><span class="line">    descriptor: ()V</span><br><span class="line"></span><br><span class="line">    flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br><span class="line"></span><br><span class="line">    Code:</span><br><span class="line"></span><br><span class="line">      stack=0, locals=1, args_size=1</span><br><span class="line"></span><br><span class="line">         0: return</span><br><span class="line"></span><br><span class="line">      LineNumberTable:</span><br><span class="line"></span><br><span class="line">        line 16: 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看出，被 synchronized 修饰的方法会有一个 ACC_SYNCHRONIZED 标志。当某个线程要访问某个方法的时候，会首先检查方法是否有 ACC_SYNCHRONIZED 标志，如果有则需要先获得 monitor 锁，然后才能开始执行方法，方法执行之后再释放 monitor 锁。其他方面， synchronized 方法和刚才的 synchronized 代码块是很类似的，例如这时如果其他线程来请求执行方法，也会因为无法获得 monitor 锁而被阻塞。</p>
+<p>好了，本课时的内容就全部讲完了，本课时我们讲解了获取和释放 monitor 的时机，以及被 synchronized 修饰的等价代码，然后我们还利用 javac 和 javap 命令查看了 synchronized 代码块以及 synchronized 方法所对应的的反汇编指令，其中同步代码块是利用 monitorenter 和 monitorexit 指令实现的，而同步方法则是利用 flags 实现的。</p>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>锁</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>20 悲观锁和乐观锁的本质是什么？</title>
     <url>/2022/12/30/tech/java/concurrent/20/</url>
     <content><![CDATA[<p>本课时我们会讲讲悲观锁和乐观锁。</p>
@@ -2722,61 +2777,6 @@
 <p>因此，我们就来看一下两种锁各自的使用场景，把合适的锁用到合适的场景中去，把合理的资源分配到合理的地方去。</p>
 <h4 id="两种锁各自的使用场景"><a href="#两种锁各自的使用场景" class="headerlink" title="两种锁各自的使用场景"></a>两种锁各自的使用场景</h4><p>悲观锁适合用于并发写入多、临界区代码复杂、竞争激烈等场景，这种场景下悲观锁可以避免大量的无用的反复尝试等消耗。</p>
 <p>乐观锁适用于大部分是读取，少部分是修改的场景，也适合虽然读写都很多，但是并发并不激烈的场景。在这些场景下，乐观锁不加锁的特点能让性能大幅提高。</p>
-]]></content>
-      <categories>
-        <category>tech</category>
-        <category>java</category>
-        <category>concurrent</category>
-      </categories>
-      <tags>
-        <tag>tech</tag>
-        <tag>java</tag>
-        <tag>锁</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>21 如何看到 synchronized 背后的“monitor 锁”？</title>
-    <url>/2022/12/30/tech/java/concurrent/21/</url>
-    <content><![CDATA[<p>本课时我们研究下 synchronized 背后的 monitor 锁。</p>
-<span id="more"></span>
-
-<h4 id="获取和释放-monitor-锁的时机"><a href="#获取和释放-monitor-锁的时机" class="headerlink" title="获取和释放 monitor 锁的时机"></a>获取和释放 monitor 锁的时机</h4><p>我们都知道，最简单的同步方式就是利用 synchronized 关键字来修饰代码块或者修饰一个方法，那么这部分被保护的代码，在同一时刻就最多只有一个线程可以运行，而 synchronized 的背后正是利用 monitor 锁实现的。所以首先我们来看下获取和释放 monitor 锁的时机，每个 Java 对象都可以用作一个实现同步的锁，这个锁也被称为内置锁或 monitor 锁，获得 monitor 锁的唯一途径就是进入由这个锁保护的同步代码块或同步方法，线程在进入被 synchronized 保护的代码块之前，会自动获取锁，并且无论是正常路径退出，还是通过抛出异常退出，在退出的时候都会自动释放锁。</p>
-<p>我们首先来看一个 synchronized 修饰方法的代码的例子：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    method body</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到 method() 方法是被 synchronized 修饰的，为了方便理解其背后的原理，我们把上面这段代码改写为下面这种等价形式的伪代码。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.intrinsicLock.lock();</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        method body</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.intrinsicLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在这种写法中，进入 method 方法后，立刻添加内置锁，并且用 try 代码块把方法保护起来，最后用 finally 释放这把锁，这里的 intrinsicLock 就是 monitor 锁。经过这样的伪代码展开之后，相信你对 synchronized 的理解就更加清晰了。</p>
-<h4 id="用-javap-命令查看反汇编的结果"><a href="#用-javap-命令查看反汇编的结果" class="headerlink" title="用 javap 命令查看反汇编的结果"></a>用 javap 命令查看反汇编的结果</h4><p>JVM 实现 synchronized 方法和 synchronized 代码块的细节是不一样的，下面我们就分别来看一下两者的实现。</p>
-<h5 id="同步代码块"><a href="#同步代码块" class="headerlink" title="同步代码块"></a>同步代码块</h5><p>首先我们来看下同步代码块的实现，如代码所示。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SynTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">synBlock</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;csdn&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 SynTest 类中的 synBlock 方法，包含一个同步代码块，synchronized 代码块中有一行代码打印了 csdn 字符串，下面我们来通过命令看下 synchronized 关键字到底做了什么事情：首先用 cd 命令切换到 SynTest.java 类所在的路径，然后执行 <code>javac SynTest.java</code>，于是就会产生一个名为 SynTest.class 的字节码文件，然后我们执行 <code>javap -verbose SynTest.class</code>，就可以看到对应的反汇编内容。</p>
-<p>关键信息如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public void synBlock();</span><br><span class="line"></span><br><span class="line">    descriptor: ()V</span><br><span class="line"></span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line"></span><br><span class="line">    Code:</span><br><span class="line"></span><br><span class="line">      stack=2, locals=3, args_size=1</span><br><span class="line"></span><br><span class="line">         0: aload_0</span><br><span class="line"></span><br><span class="line">         1: dup</span><br><span class="line"></span><br><span class="line">         2: astore_1</span><br><span class="line"></span><br><span class="line">         3: monitorenter</span><br><span class="line"></span><br><span class="line">         4: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line"></span><br><span class="line">         7: ldc           #3                      // String lagou</span><br><span class="line"></span><br><span class="line">         9: invokevirtual #4               // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line"></span><br><span class="line">        12: aload_1</span><br><span class="line"></span><br><span class="line">        13: monitorexit</span><br><span class="line"></span><br><span class="line">        14: goto          22</span><br><span class="line"></span><br><span class="line">        17: astore_2</span><br><span class="line"></span><br><span class="line">        18: aload_1</span><br><span class="line"></span><br><span class="line">        19: monitorexit</span><br><span class="line"></span><br><span class="line">        20: aload_2</span><br><span class="line"></span><br><span class="line">        21: athrow</span><br><span class="line"></span><br><span class="line">        22: return</span><br></pre></td></tr></table></figure>
-
-<p>从里面可以看出，synchronized 代码块实际上多了 monitorenter 和 monitorexit 指令，标红的第3、13、19行指令分别对应的是 monitorenter 和 monitorexit。这里有一个 monitorenter，却有两个 monitorexit 指令的原因是，JVM 要保证每个 monitorenter 必须有与之对应的 monitorexit，monitorenter 指令被插入到同步代码块的开始位置，而 monitorexit 需要插入到方法正常结束处和异常处两个地方，这样就可以保证抛异常的情况下也能释放锁</p>
-<p>可以把执行 monitorenter 理解为加锁，执行 monitorexit 理解为释放锁，每个对象维护着一个记录着被锁次数的计数器。未被锁定的对象的该计数器为 0，我们来具体看一下 monitorenter 和 monitorexit 的含义：</p>
-<ul>
-<li>monitorenter</li>
-</ul>
-<p>执行 monitorenter 的线程尝试获得 monitor 的所有权，会发生以下这三种情况之一：</p>
-<p>a. 如果该 monitor 的计数为 0，则线程获得该 monitor 并将其计数设置为 1。然后，该线程就是这个 monitor 的所有者。</p>
-<p>b. 如果线程已经拥有了这个 monitor ，则它将重新进入，并且累加计数。</p>
-<p>c. 如果其他线程已经拥有了这个 monitor，那个这个线程就会被阻塞，直到这个 monitor 的计数变成为 0，代表这个 monitor 已经被释放了，于是当前这个线程就会再次尝试获取这个 monitor。</p>
-<ul>
-<li>monitorexit monitorexit 的作用是将 monitor 的计数器减 1，直到减为 0 为止。代表这个 monitor 已经被释放了，已经没有任何线程拥有它了，也就代表着解锁，所以，其他正在等待这个 monitor 的线程，此时便可以再次尝试获取这个 monitor 的所有权。</li>
-</ul>
-<h4 id="同步方法"><a href="#同步方法" class="headerlink" title="同步方法"></a>同步方法</h4><p>从上面可以看出，同步代码块是使用 monitorenter 和 monitorexit 指令实现的。而对于 synchronized 方法，并不是依靠 monitorenter 和 monitorexit 指令实现的，被 javap 反汇编后可以看到，synchronized 方法和普通方法大部分是一样的，不同在于，这个方法会有一个叫作 ACC_SYNCHRONIZED 的 flag 修饰符，来表明它是同步方法。</p>
-<p>同步方法的代码如下所示。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">synMethod</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>对应的反汇编指令如下所示。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public synchronized void synMethod();</span><br><span class="line"></span><br><span class="line">    descriptor: ()V</span><br><span class="line"></span><br><span class="line">    flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br><span class="line"></span><br><span class="line">    Code:</span><br><span class="line"></span><br><span class="line">      stack=0, locals=1, args_size=1</span><br><span class="line"></span><br><span class="line">         0: return</span><br><span class="line"></span><br><span class="line">      LineNumberTable:</span><br><span class="line"></span><br><span class="line">        line 16: 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>可以看出，被 synchronized 修饰的方法会有一个 ACC_SYNCHRONIZED 标志。当某个线程要访问某个方法的时候，会首先检查方法是否有 ACC_SYNCHRONIZED 标志，如果有则需要先获得 monitor 锁，然后才能开始执行方法，方法执行之后再释放 monitor 锁。其他方面， synchronized 方法和刚才的 synchronized 代码块是很类似的，例如这时如果其他线程来请求执行方法，也会因为无法获得 monitor 锁而被阻塞。</p>
-<p>好了，本课时的内容就全部讲完了，本课时我们讲解了获取和释放 monitor 的时机，以及被 synchronized 修饰的等价代码，然后我们还利用 javac 和 javap 命令查看了 synchronized 代码块以及 synchronized 方法所对应的的反汇编指令，其中同步代码块是利用 monitorenter 和 monitorexit 指令实现的，而同步方法则是利用 flags 实现的。</p>
 ]]></content>
       <categories>
         <category>tech</category>
@@ -2951,6 +2951,135 @@
 <p>这里调用的就是 nonfairTryAcquire()，表明了是不公平的，和锁本身是否是公平锁无关。</p>
 <p>综上所述，公平锁就是会按照多个线程申请锁的顺序来获取锁，从而实现公平的特性。非公平锁加锁时不考虑排队等待情况，直接尝试获取锁，所以存在后申请却先获得锁的情况，但由此也提高了整体的效率。</p>
 ]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>锁</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>25 读写锁 ReadWriteLock 获取锁有哪些规则？</title>
+    <url>/2023/01/04/tech/java/concurrent/25/</url>
+    <content><![CDATA[<p>在本课时我们主要讲解读写锁 ReadWriteLock 获取锁有哪些规则呢？</p>
+<span id="more"></span>
+
+<p>在没有读写锁之前，我们假设使用普通的 ReentrantLock，那么虽然我们保证了线程安全，但是也浪费了一定的资源，因为如果多个读操作同时进行，其实并没有线程安全问题，我们可以允许让多个读操作并行，以便提高程序效率。</p>
+<p>但是写操作不是线程安全的，如果多个线程同时写，或者在写的同时进行读操作，便会造成线程安全问题。</p>
+<p>我们的读写锁就解决了这样的问题，它设定了一套规则，既可以保证多个线程同时读的效率，同时又可以保证有写入操作时的线程安全。</p>
+<p>整体思路是它有两把锁，第 1 把锁是写锁，获得写锁之后，既可以读数据又可以修改数据，而第 2 把锁是读锁，获得读锁之后，只能查看数据，不能修改数据。读锁可以被多个线程同时持有，所以多个线程可以同时查看数据。</p>
+<p>在读的地方合理使用读锁，在写的地方合理使用写锁，灵活控制，可以提高程序的执行效率。</p>
+<h4 id="读写锁的获取规则"><a href="#读写锁的获取规则" class="headerlink" title="读写锁的获取规则"></a>读写锁的获取规则</h4><p>我们在使用读写锁时遵守下面的获取规则：</p>
+<ol>
+<li>如果有一个线程已经占用了读锁，则此时其他线程如果要申请读锁，可以申请成功。</li>
+<li>如果有一个线程已经占用了读锁，则此时其他线程如果要申请写锁，则申请写锁的线程会一直等待释放读锁，因为读写不能同时操作。</li>
+<li>如果有一个线程已经占用了写锁，则此时其他线程如果申请写锁或者读锁，都必须等待之前的线程释放写锁，同样也因为读写不能同时，并且两个线程不应该同时写。</li>
+</ol>
+<p>所以我们用一句话总结：要么是一个或多个线程同时有读锁，要么是一个线程有写锁，但是两者不会同时出现。也可以总结为：读读共享、其他都互斥（写写互斥、读写互斥、写读互斥）。</p>
+<h4 id="使用案例"><a href="#使用案例" class="headerlink" title="使用案例"></a>使用案例</h4><p>下面我们举个例子来应用读写锁，ReentrantReadWriteLock 是 ReadWriteLock 的实现类，最主要的有两个方法：readLock() 和 writeLock() 用来获取读锁和写锁。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 描述：     演示读写锁用法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReadWriteLockDemo</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">reentrantReadWriteLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>(<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ReentrantReadWriteLock.<span class="type">ReadLock</span> <span class="variable">readLock</span> <span class="operator">=</span> reentrantReadWriteLock.readLock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ReentrantReadWriteLock.<span class="type">WriteLock</span> <span class="variable">writeLock</span> <span class="operator">=</span> reentrantReadWriteLock.writeLock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">read</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        readLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;得到读锁，正在读取&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">500</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;释放读锁&quot;</span>);</span><br><span class="line">            readLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;得到写锁，正在写入&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">500</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;释放写锁&quot;</span>);</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; read()).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; read()).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; write()).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; write()).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序的运行结果是：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Thread-<span class="number">0</span>得到读锁，正在读取</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">1</span>得到读锁，正在读取</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">0</span>释放读锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">1</span>释放读锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">2</span>得到写锁，正在写入</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">2</span>释放写锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">3</span>得到写锁，正在写入</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">3</span>释放写锁</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，读锁可以同时被多个线程获得，而写锁不能。</p>
+<h4 id="读写锁适用场合"><a href="#读写锁适用场合" class="headerlink" title="读写锁适用场合"></a>读写锁适用场合</h4><p>最后我们来看下读写锁的适用场合，相比于 ReentrantLock 适用于一般场合，ReadWriteLock 适用于读多写少的情况，合理使用可以进一步提高并发效率。</p>
+]]></content>
+      <categories>
+        <category>tech</category>
+        <category>java</category>
+        <category>concurrent</category>
+      </categories>
+      <tags>
+        <tag>tech</tag>
+        <tag>java</tag>
+        <tag>锁</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>page</title>
+    <url>/2023/01/04/tech/java/concurrent/26/</url>
+    <content><![CDATA[<p>在本课时我们主要讲解读锁应该插队吗?以及什么是读写锁的升降级。</p>
+<span id="more"></span>
+
+<h4 id="读锁插队策略"><a href="#读锁插队策略" class="headerlink" title="读锁插队策略"></a>读锁插队策略</h4><p>首先，我们来看一下读锁的插队策略，在这里先快速回顾一下在 24 课时公平与非公平锁中讲到的 ReentrantLock，如果锁被设置为非公平，那么它是可以在前面线程释放锁的瞬间进行插队的，而不需要进行排队。在读写锁这里，策略也是这样的吗？</p>
+<p>首先，我们看到 ReentrantReadWriteLock 可以设置为公平或者非公平，代码如下：</p>
+<p>公平锁：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">ReentrantReadWriteLock</span> <span class="variable">reentrantReadWriteLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<p>非公平锁：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">ReentrantReadWriteLock</span> <span class="variable">reentrantReadWriteLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>(<span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+
+<p>如果是公平锁，我们就在构造函数的参数中传入 true，如果是非公平锁，就在构造函数的参数中传入 false，默认是非公平锁。在获取读锁之前，线程会检查 readerShouldBlock() 方法，同样，在获取写锁之前，线程会检查 writerShouldBlock() 方法，来决定是否需要插队或者是去排队。</p>
+<p>首先看公平锁对于这两个方法的实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">writerShouldBlock</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> hasQueuedPredecessors();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">readerShouldBlock</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> hasQueuedPredecessors();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显，在公平锁的情况下，只要等待队列中有线程在等待，也就是 hasQueuedPredecessors() 返回 true 的时候，那么 writer 和 reader 都会 block，也就是一律不允许插队，都乖乖去排队，这也符合公平锁的思想。</p>
+<p>下面让我们来看一下非公平锁的实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">writerShouldBlock</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>; <span class="comment">// writers can always barge</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">readerShouldBlock</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> apparentlyFirstQueuedIsExclusive();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 writerShouldBlock() 这个方法中始终返回 false，可以看出，对于想获取写锁的线程而言，由于返回值是 false，所以它是随时可以插队的，这就和我们的 ReentrantLock 的设计思想是一样的，但是读锁却不一样。这里实现的策略很有意思，先让我们来看下面这种场景：</p>
+<p>假设线程 2 和线程 4 正在同时读取，线程 3 想要写入，但是由于线程 2 和线程 4 已经持有读锁了，所以线程 3 就进入等待队列进行等待。此时，线程 5 突然跑过来想要插队获取读锁：</p>
+<img data-src="/2023/01/04/tech/java/concurrent/26/c_26_01.png" class="">
+
+<p>面对这种情况有两种应对策略：</p>
+<h4 id="第一种策略：允许插队"><a href="#第一种策略：允许插队" class="headerlink" title="第一种策略：允许插队"></a>第一种策略：允许插队</h4><p>由于现在有线程在读，而线程 5 又不会特别增加它们读的负担，因为线程们可以共用这把锁，所以第一种策略就是让线程 5 直接加入到线程 2 和线程 4 一起去读取。</p>
+<p>这种策略看上去增加了效率，但是有一个严重的问题，那就是如果想要读取的线程不停地增加，比如线程 6，那么线程 6 也可以插队，这就会导致读锁长时间内不会被释放，导致线程 3 长时间内拿不到写锁，也就是那个需要拿到写锁的线程会陷入“饥饿”状态，它将在长时间内得不到执行。</p>
+<img data-src="/2023/01/04/tech/java/concurrent/26/c_26_02.png" class="">
+
+
+<h4 id="第二种策略：不允许插队"><a href="#第二种策略：不允许插队" class="headerlink" title="第二种策略：不允许插队"></a>第二种策略：不允许插队</h4><p>这种策略认为由于线程 3 已经提前等待了，所以虽然线程 5 如果直接插队成功，可以提高效率，但是我们依然让线程 5 去排队等待：</p>
+<img data-src="/2023/01/04/tech/java/concurrent/26/c_26_03.png" class="">
+
+<p>按照这种策略线程 5 会被放入等待队列中，并且排在线程 3 的后面，让线程 3 优先于线程 5 执行，这样可以避免“饥饿”状态，这对于程序的健壮性是很有好处的，直到线程 3 运行完毕，线程 5 才有机会运行，这样谁都不会等待太久的时间。</p>
+<img data-src="/2023/01/04/tech/java/concurrent/26/c_26_04.png" class="">
+
+<p>所以我们可以看出，即便是非公平锁，只要等待队列的头结点是尝试获取写锁的线程，那么读锁依然是不能插队的，目的是避免“饥饿”。</p>
+<h4 id="策略选择演示"><a href="#策略选择演示" class="headerlink" title="策略选择演示"></a>策略选择演示</h4><p>策略的选择取决于具体锁的实现，ReentrantReadWriteLock 的实现选择了策略 2 ，是很明智的。</p>
+<p>下面我们就用实际的代码来演示一下上面这种场景。</p>
+<p>策略演示代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 描述：     演示读锁不插队</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReadLockJumpQueue</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">reentrantReadWriteLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ReentrantReadWriteLock.<span class="type">ReadLock</span> <span class="variable">readLock</span> <span class="operator">=</span> reentrantReadWriteLock.readLock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ReentrantReadWriteLock.<span class="type">WriteLock</span> <span class="variable">writeLock</span> <span class="operator">=</span> reentrantReadWriteLock.writeLock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">read</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        readLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;得到读锁，正在读取&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;释放读锁&quot;</span>);</span><br><span class="line">            readLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;得到写锁，正在写入&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot;释放写锁&quot;</span>);</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; read(),<span class="string">&quot;Thread-2&quot;</span>).start();</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; read(),<span class="string">&quot;Thread-4&quot;</span>).start();</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; write(),<span class="string">&quot;Thread-3&quot;</span>).start();</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; read(),<span class="string">&quot;Thread-5&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码的运行结果是：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Thread-<span class="number">2</span>得到读锁，正在读取</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">4</span>得到读锁，正在读取</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">2</span>释放读锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">4</span>释放读锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">3</span>得到写锁，正在写入</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">3</span>释放写锁</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">5</span>得到读锁，正在读取</span><br><span class="line"></span><br><span class="line">Thread-<span class="number">5</span>释放读锁</span><br></pre></td></tr></table></figure>
+
+<p>从这个结果可以看出，ReentrantReadWriteLock 的实现选择了“不允许插队”的策略，这就大大减小了发生“饥饿”的概率。（如果运行结果和课程不一致，可以在每个线程启动后增加 100ms 的睡眠时间，以便保证线程的运行顺序）。</p>
+<h4 id="锁的升降级"><a href="#锁的升降级" class="headerlink" title="锁的升降级"></a>锁的升降级</h4><h5 id="读写锁降级功能代码演示"><a href="#读写锁降级功能代码演示" class="headerlink" title="读写锁降级功能代码演示"></a>读写锁降级功能代码演示</h5><p>下面我们再来看一下锁的升降级，首先我们看一下这段代码，这段代码演示了在更新缓存的时候，如何利用锁的降级功能。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CachedData</span> &#123;</span><br><span class="line"></span><br><span class="line">    Object data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">boolean</span> cacheValid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">rwl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processCachedData</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        rwl.readLock().lock();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!cacheValid) &#123;</span><br><span class="line">            <span class="comment">//在获取写锁之前，必须首先释放读锁。</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">            rwl.writeLock().lock();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">//这里需要再次判断数据的有效性,因为在我们释放读锁和获取写锁的空隙之内，可能有其他线程修改了数据。</span></span><br><span class="line">                <span class="keyword">if</span> (!cacheValid) &#123;</span><br><span class="line">                    data = <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">                    cacheValid = <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//在不释放写锁的情况下，直接获取读锁，这就是读写锁的降级。</span></span><br><span class="line">                rwl.readLock().lock();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">//释放了写锁，但是依然持有读锁</span></span><br><span class="line">                rwl.writeLock().unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(data);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">//释放读锁</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这段代码中有一个读写锁，最重要的就是中间的 processCachedData 方法，在这个方法中，会首先获取到读锁，也就是rwl.readLock().lock()，它去判断当前的缓存是否有效，如果有效那么就直接跳过整个 if 语句，如果已经失效，代表我们需要更新这个缓存了。由于我们需要更新缓存，所以之前获取到的读锁是不够用的，我们需要获取写锁。</p>
+<p>在获取写锁之前，我们首先释放读锁，然后利用 rwl.writeLock().lock() 来获取到写锁，然后是经典的 try finally 语句，在 try 语句中我们首先判断缓存是否有效，因为在刚才释放读锁和获取写锁的过程中，可能有其他线程抢先修改了数据，所以在此我们需要进行二次判断。</p>
+<p>如果我们发现缓存是无效的，就用 new Object() 这样的方式来示意，获取到了新的数据内容，并把缓存的标记位设置为 ture，让缓存变得有效。由于我们后续希望打印出 data 的值，所以不能在此处释放掉所有的锁。我们的选择是在不释放写锁的情况下直接获取读锁，也就是rwl.readLock().lock() 这行语句所做的事情，然后，在持有读锁的情况下释放写锁，最后，在最下面的 try 中把 data 的值打印出来。</p>
+<p>这就是一个非常典型的利用锁的降级功能的代码。</p>
+<p>你可能会想，我为什么要这么麻烦进行降级呢？我一直持有最高等级的写锁不就可以了吗？这样谁都没办法来影响到我自己的工作，永远是线程安全的。</p>
+<h5 id="为什么需要锁的降级？"><a href="#为什么需要锁的降级？" class="headerlink" title="为什么需要锁的降级？"></a>为什么需要锁的降级？</h5><p>如果我们在刚才的方法中，一直使用写锁，最后才释放写锁的话，虽然确实是线程安全的，但是也是没有必要的，因为我们只有一处修改数据的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">data = <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br></pre></td></tr></table></figure>
+
+<p>后面我们对于 data 仅仅是读取。如果还一直使用写锁的话，就不能让多个线程同时来读取了，持有写锁是浪费资源的，降低了整体的效率，所以这个时候利用锁的降级是很好的办法，可以提高整体性能。</p>
+<h5 id="支持锁的降级，不支持升级"><a href="#支持锁的降级，不支持升级" class="headerlink" title="支持锁的降级，不支持升级"></a>支持锁的降级，不支持升级</h5><p>如果我们运行下面这段代码，在不释放读锁的情况下直接尝试获取写锁，也就是锁的升级，会让线程直接阻塞，程序是无法运行的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">static</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">rwl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">    upgrade();</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">upgrade</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    rwl.readLock().lock();</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">&quot;获取到了读锁&quot;</span>);</span><br><span class="line"></span><br><span class="line">    rwl.writeLock().lock();</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">&quot;成功升级&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码会打印出“获取到了读锁”，但是却不会打印出“成功升级”，因为 ReentrantReadWriteLock 不支持读锁升级到写锁。</p>
+<h5 id="为什么不支持锁的升级？"><a href="#为什么不支持锁的升级？" class="headerlink" title="为什么不支持锁的升级？"></a>为什么不支持锁的升级？</h5><p>我们知道读写锁的特点是如果线程都申请读锁，是可以多个线程同时持有的，可是如果是写锁，只能有一个线程持有，并且不可能存在读锁和写锁同时持有的情况。</p>
+<p>正是因为不可能有读锁和写锁同时持有的情况，所以升级写锁的过程中，需要等到所有的读锁都释放，此时才能进行升级。</p>
+<p>假设有 A，B 和 C 三个线程，它们都已持有读锁。假设线程 A 尝试从读锁升级到写锁。那么它必须等待 B 和 C 释放掉已经获取到的读锁。如果随着时间推移，B 和 C 逐渐释放了它们的读锁，此时线程 A 确实是可以成功升级并获取写锁。</p>
+<p>但是我们考虑一种特殊情况。假设线程 A 和 B 都想升级到写锁，那么对于线程 A 而言，它需要等待其他所有线程，包括线程 B 在内释放读锁。而线程 B 也需要等待所有的线程，包括线程 A 释放读锁。这就是一种非常典型的死锁的情况。谁都愿不愿意率先释放掉自己手中的锁。</p>
+<p>但是读写锁的升级并不是不可能的，也有可以实现的方案，如果我们保证每次只有一个线程可以升级，那么就可以保证线程安全。只不过最常见的 ReentrantReadWriteLock 对此并不支持。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>对于 ReentrantReadWriteLock 而言。</p>
+<h5 id="插队策略"><a href="#插队策略" class="headerlink" title="插队策略"></a>插队策略</h5><ul>
+<li>公平策略下，只要队列里有线程已经在排队，就不允许插队。</li>
+<li>非公平策略下：<ul>
+<li>如果允许读锁插队，那么由于读锁可以同时被多个线程持有，所以可能造成源源不断的后面的线程一直插队成功，导致读锁一直不能完全释放，从而导致写锁一直等待，为了防止“饥饿”，在等待队列的头结点是尝试获取写锁的线程的时候，不允许读锁插队。</li>
+<li>写锁可以随时插队，因为写锁并不容易插队成功，写锁只有在当前没有任何其他线程持有读锁和写锁的时候，才能插队成功，同时写锁一旦插队失败就会进入等待队列，所以很难造成“饥饿”的情况，允许写锁插队是为了提高效率。</li>
+</ul>
+</li>
+</ul>
+<h5 id="升降级策略：只能从写锁降级为读锁，不能从读锁升级为写锁。"><a href="#升降级策略：只能从写锁降级为读锁，不能从读锁升级为写锁。" class="headerlink" title="升降级策略：只能从写锁降级为读锁，不能从读锁升级为写锁。"></a>升降级策略：只能从写锁降级为读锁，不能从读锁升级为写锁。</h5>]]></content>
       <categories>
         <category>tech</category>
         <category>java</category>
