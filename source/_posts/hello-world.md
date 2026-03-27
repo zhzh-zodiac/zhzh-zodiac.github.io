@@ -10,6 +10,11 @@ Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [docume
 
 ## Quick Start
 
+### install hexo
+``` bash
+$ npm install -g hexo-cli
+```
+
 ### Create a new post
 
 ``` bash
